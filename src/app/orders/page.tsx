@@ -19,7 +19,7 @@ import { PaymentMethod } from "@/enum/paymentMethod";
 export default function OrderPage() {
     const [search, setSearch] = useState("");
     const [sortField, setSortField] = useState<keyof Order>("createdAt");
-    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
 
