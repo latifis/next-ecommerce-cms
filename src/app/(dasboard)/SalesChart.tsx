@@ -13,12 +13,16 @@ import {
     Title,
     Tooltip,
     Legend,
+    ChartTypeRegistry
 } from "chart.js";
 
-import { MonthlySales } from "@/types/statistics/monthlySales";
-import { TopSellingProducts } from "@/types/statistics/topSellingProducts";
-import { TopCategories } from "@/types/statistics/topCategories";
-import { TopPaymentMethods } from "@/types/statistics/topPaymentMethods";
+import {
+    useMonthlySales,
+    useTopCategories,
+    useTopPaymentMethods,
+    useTopSellingProducts
+} from "@/satelite/services/statisticService";
+import ErrorComponent from "@/components/Error";
 
 Chart.register(
     LineController,
@@ -33,44 +37,84 @@ Chart.register(
     Legend
 );
 
-interface SalesChartProps {
-    monthlySales: MonthlySales[];
-    topSellingProducts: TopSellingProducts[];
-    topCategories: TopCategories[];
-    topPaymentMethods: TopPaymentMethods[];
-}
+export default function SalesChart() {
+    const monthlySalesRef = useRef<HTMLCanvasElement>(null!);
+    const topProductsRef = useRef<HTMLCanvasElement>(null!);
+    const topCategoriesRef = useRef<HTMLCanvasElement>(null!);
+    const topPaymentsRef = useRef<HTMLCanvasElement>(null!);
 
-export default function SalesChart({
-    monthlySales,
-    topSellingProducts,
-    topCategories,
-    topPaymentMethods,
-}: SalesChartProps) {
-    const monthlySalesRef = useRef<HTMLCanvasElement>(null);
-    const topProductsRef = useRef<HTMLCanvasElement>(null);
-    const topCategoriesRef = useRef<HTMLCanvasElement>(null);
-    const topPaymentsRef = useRef<HTMLCanvasElement>(null);
-
-    const monthlySalesLabels = monthlySales.map((item) => {
-        const date = new Date(0);
-        date.setMonth(item.month - 1);
-        return date.toLocaleString("default", { month: "long" });
+    const chartInstances = useRef<Record<string, Chart | null>>({
+        monthly: null,
+        topProducts: null,
+        topCategories: null,
+        topPayments: null,
     });
 
-    const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-    const monthlySalesData = monthlySales.map((item) => item.totalRevenue);
+    const currentYear = new Date().getFullYear().toString();
+    const currentMonth2 = new Date().getMonth() + 1;
+    const currentMonth = new Date().toLocaleString("default", { month: "long" });
 
-    const renderChart = (
-        ref: React.RefObject<HTMLCanvasElement | null>,
-        type: "line" | "bar",
-        labels: string[],
-        dataset: { label: string; data: number[]; backgroundColor: string },
-        title: string,
-        hoverTooltip: (context: { dataIndex: number; raw: number }) => string
-    ) => {
-        const ctx = ref.current?.getContext("2d");
-        if (ctx) {
-            new Chart(ctx, {
+    const filter = {
+        year: currentYear,
+        topCount: 5,
+        month: currentMonth2,
+    };
+
+    const {
+        data: monthlySales,
+        isPending: isPendingMonthlySales,
+        isError: isErrorMonthlySales
+    } = useMonthlySales({ year: currentYear });
+
+    const {
+        data: topSellingProducts,
+        isPending: isPendingTopSellingProducts,
+        isError: isErrorTopSellingProducts
+    } = useTopSellingProducts(filter);
+
+    const {
+        data: topCategories,
+        isPending: isPendingTopCategories,
+        isError: isErrorTopCategories
+    } = useTopCategories(filter);
+
+    const {
+        data: topPaymentMethods,
+        isPending: isPendingTopPaymentMethods,
+        isError: isErrorTopPaymentMethods
+    } = useTopPaymentMethods(filter);
+
+    useEffect(() => {
+        if (
+            !monthlySales ||
+            !topSellingProducts ||
+            !topCategories ||
+            !topPaymentMethods
+        ) return;
+
+        const chartRefSnapshot = chartInstances.current;
+
+        const renderChart = (
+            key: keyof typeof chartRefSnapshot,
+            ref: React.RefObject<HTMLCanvasElement>,
+            type: keyof ChartTypeRegistry,
+            labels: string[],
+            dataset: {
+                label: string;
+                data: number[];
+                backgroundColor: string;
+            },
+            title: string,
+            hoverTooltip: (context: { dataIndex: number; raw: number }) => string
+        ) => {
+            const ctx = ref.current?.getContext("2d");
+            if (!ctx) return;
+
+            if (chartRefSnapshot[key]) {
+                chartRefSnapshot[key]!.destroy();
+            }
+
+            chartRefSnapshot[key] = new Chart(ctx, {
                 type,
                 data: {
                     labels,
@@ -88,23 +132,33 @@ export default function SalesChart({
                         },
                         tooltip: {
                             callbacks: {
-                                label: (tooltipItem) => hoverTooltip({ dataIndex: tooltipItem.dataIndex, raw: tooltipItem.raw as number }),
+                                label: (tooltipItem) =>
+                                    hoverTooltip({
+                                        dataIndex: tooltipItem.dataIndex,
+                                        raw: tooltipItem.raw as number,
+                                    }),
                             },
                         },
                     },
                 },
             });
-        }
-    };
+        };
 
-    useEffect(() => {
+        const msData = monthlySales.data.monthlySales;
+        const msLabels = msData.map((item) => {
+            const date = new Date(0);
+            date.setMonth(item.month - 1);
+            return date.toLocaleString("default", { month: "long" });
+        });
+
         renderChart(
+            "monthly",
             monthlySalesRef,
             "line",
-            monthlySalesLabels,
+            msLabels,
             {
                 label: "Sales (IDR)",
-                data: monthlySalesData,
+                data: msData.map((item) => item.totalRevenue),
                 backgroundColor: "rgba(75, 192, 192, 0.2)",
             },
             "Monthly Sales",
@@ -112,59 +166,83 @@ export default function SalesChart({
         );
 
         renderChart(
+            "topProducts",
             topProductsRef,
             "bar",
-            topSellingProducts.map((product) => product.name),
+            topSellingProducts.data.topSellingProducts.map((p) => p.name),
             {
                 label: "Sales (IDR)",
-                data: topSellingProducts.map((product) => product.totalSales),
+                data: topSellingProducts.data.topSellingProducts.map((p) => p.totalSales),
                 backgroundColor: "rgba(255, 99, 132, 0.6)",
             },
             "Top Selling Products",
             (context) => {
-                const product = topSellingProducts[context.dataIndex];
-                return `Revenue: ${product.totalRevenue.toLocaleString()} IDR\nPrice: ${product.price.toLocaleString()} IDR`;
+                const p = topSellingProducts.data.topSellingProducts[context.dataIndex];
+                return `Revenue: ${p.totalRevenue.toLocaleString()} IDR\nPrice: ${p.price.toLocaleString()} IDR`;
             }
         );
 
         renderChart(
+            "topCategories",
             topCategoriesRef,
             "bar",
-            topCategories.map((category) => category.category),
+            topCategories.data.topCategories.map((c) => c.category),
             {
                 label: "Sales (IDR)",
-                data: topCategories.map((category) => category.totalSales),
+                data: topCategories.data.topCategories.map((c) => c.totalSales),
                 backgroundColor: "rgba(54, 162, 235, 0.6)",
             },
             "Top Categories",
             (context) => {
-                const category = topCategories[context.dataIndex];
-                return `Revenue: ${category.totalRevenue.toLocaleString()} IDR`;
+                const c = topCategories.data.topCategories[context.dataIndex];
+                return `Revenue: ${c.totalRevenue.toLocaleString()} IDR`;
             }
         );
 
         renderChart(
+            "topPayments",
             topPaymentsRef,
             "bar",
-            topPaymentMethods.map((payment) => payment.paymentMethod),
+            topPaymentMethods.data.topPaymentMethods.map((p) => p.paymentMethod),
             {
                 label: "Transactions",
-                data: topPaymentMethods.map((payment) => payment.totalTransactions),
+                data: topPaymentMethods.data.topPaymentMethods.map((p) => p.totalTransactions),
                 backgroundColor: "rgba(153, 102, 255, 0.6)",
             },
             "Top Payment Methods",
             (context) => {
-                const paymentMethod = topPaymentMethods[context.dataIndex];
-                return `Revenue: ${paymentMethod.totalRevenue.toLocaleString()} IDR`;
+                const p = topPaymentMethods.data.topPaymentMethods[context.dataIndex];
+                return `Revenue: ${p.totalRevenue.toLocaleString()} IDR`;
             }
         );
+
+        return () => {
+            Object.values(chartRefSnapshot).forEach((chart) => chart?.destroy());
+        };
     }, [
-        monthlySalesLabels,
-        monthlySalesData,
+        monthlySales,
         topSellingProducts,
         topCategories,
-        topPaymentMethods,
+        topPaymentMethods
     ]);
+
+    if (
+        isErrorMonthlySales ||
+        isErrorTopSellingProducts ||
+        isErrorTopCategories ||
+        isErrorTopPaymentMethods
+    ) return <ErrorComponent />;
+
+    if (
+        isPendingMonthlySales ||
+        isPendingTopSellingProducts ||
+        isPendingTopCategories ||
+        isPendingTopPaymentMethods
+    ) return (
+        <div className="flex justify-center items-center h-full">
+            Loading...
+        </div>
+    );
 
     return (
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 mx-2">
@@ -176,9 +254,7 @@ export default function SalesChart({
                     </p>
                 </div>
 
-                {/* Monthly Sales and Top Payment Methods Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    {/* Monthly Sales */}
                     <div className="col-span-1 lg:col-span-2 bg-white rounded-lg shadow p-4">
                         <h2 className="text-lg font-semibold mb-2">Monthly Sales</h2>
                         <div className="w-full h-[500px]">
@@ -186,20 +262,17 @@ export default function SalesChart({
                         </div>
                     </div>
 
-                    {/* Top Payment Methods */}
                     <div className="col-span-1 bg-white rounded-lg shadow p-4">
                         <h2 className="text-lg font-semibold mb-2">
                             {currentMonth}&apos;s Top Payment Methods
                         </h2>
                         <div className="w-full h-[500px]">
-                            <canvas ref={topPaymentsRef} style={{ height: "100%", width: "100%" }}></canvas>
+                            <canvas ref={topPaymentsRef}></canvas>
                         </div>
                     </div>
                 </div>
 
-                {/* Top Selling Products and Top Categories Section */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Top Selling Products */}
                     <div className="bg-white rounded-lg shadow p-4">
                         <h2 className="text-lg font-semibold mb-2">
                             {currentMonth}&apos;s Top Selling Products
@@ -209,7 +282,6 @@ export default function SalesChart({
                         </div>
                     </div>
 
-                    {/* Top Categories */}
                     <div className="bg-white rounded-lg shadow p-4">
                         <h2 className="text-lg font-semibold mb-2">
                             {currentMonth}&apos;s Top Categories

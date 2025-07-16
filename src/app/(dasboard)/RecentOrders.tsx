@@ -1,22 +1,27 @@
 "use client"
 
-import { Order } from "@/types/order/order";
+import ErrorComponent from "@/components/Error";
+import { useOrders } from "@/satelite/services/orderService";
 import { formatDate } from "@/utils/formatDate";
 import { formatTime } from "@/utils/formatTime";
 import { capitalizeWords } from "@/utils/stringUtils";
 import { useRouter } from "next/navigation";
 import { FaArrowRight } from "react-icons/fa";
 
-interface RecentOrdersProps {
-    recentOrders: Order[] | undefined;
-}
-
-export default function RecentOrders({ recentOrders }: RecentOrdersProps) {
+export default function RecentOrders() {
     const router = useRouter();
+
+    const { data: order, isPending, isError } = useOrders({
+        sortField: "updatedAt"
+    });
 
     const handleClick = () => {
         router.push("/orders");
     };
+
+    if (isError) return <ErrorComponent />;
+
+    if (isPending) return <div className="text-center text-gray-500">Loading...</div>;
 
     return (
         <>
@@ -62,8 +67,8 @@ export default function RecentOrders({ recentOrders }: RecentOrdersProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {recentOrders && recentOrders.length > 0 ? (
-                            recentOrders.map((order, index) => (
+                        {order?.data.data && order.data.data.length > 0 ? (
+                            order?.data.data.map((order, index) => (
                                 <tr
                                     key={order.id}
                                     className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-t`}

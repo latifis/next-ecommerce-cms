@@ -2,8 +2,6 @@
 
 import ErrorComponent from "@/components/Error";
 import { useBrandById, useUpdateBrand } from "@/satelite/services/brandService";
-import { decodeToken } from "@/utils/decodeToken";
-import Cookies from 'js-cookie';
 import { AxiosError } from "axios";
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
@@ -40,8 +38,6 @@ export default function UpdateBrandModal({
         setImageFile(null);
     }
 
-    const decodedToken = decodeToken(Cookies.get("token"))
-
     const { mutate: updateBrand, isPending } = useUpdateBrand(brandIdToUpdate);
 
     const { data: brand, isLoading, isError } = useBrandById(brandIdToUpdate);
@@ -62,12 +58,9 @@ export default function UpdateBrandModal({
             return;
         }
 
-        if (!decodedToken?.email) return <ErrorComponent />
-
         const updatedBrand = new FormData();
         updatedBrand.append("name", name);
         updatedBrand.append("description", description);
-        updatedBrand.append("updatedBy", decodedToken?.email)
         if (imageFile) {
             updatedBrand.append("file", imageFile);
         }

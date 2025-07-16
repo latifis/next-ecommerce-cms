@@ -1,10 +1,12 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { FetchParamsStatistics } from "@/types/fetchParamsStatistics";
 import { TopSellingProductsResponse } from "@/types/statistics/topSellingProductsResponse";
-import axios from "axios";
+import { buildQueryString } from "@/utils/buildQueryString";
 
 export const fetchTopSellingProducts = async (params: FetchParamsStatistics): Promise<TopSellingProductsResponse> => {
-    const response = await axios.get<TopSellingProductsResponse>(process.env.NEXT_PUBLIC_BASE_URL + `/statistics/top-selling-products`, { params });
+    const queryString = buildQueryString(params || {});
+    const response = await apiClient.get<TopSellingProductsResponse>(
+        `/statistics/top-selling-products?${queryString}`
+    );
     return response.data;
 };

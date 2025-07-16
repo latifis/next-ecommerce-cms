@@ -1,17 +1,24 @@
-import { Statistics } from "@/types/statistics/statistics";
+"use client";
+
+import ErrorComponent from "@/components/Error";
+import { useStatistics } from "@/satelite/services/statisticService";
 import Link from "next/link";
 import { FaBox, FaShoppingCart, FaTags, FaUsers } from "react-icons/fa";
 import { FaRupiahSign } from "react-icons/fa6";
 
-export default function StatisticsOrders({
-    statistics,
-}: { statistics: Statistics }) {
+export default function StatisticsOrders() {
 
-    statisticsData[0].value = statistics.totalProducts;
-    statisticsData[1].value = statistics.totalCategories;
-    statisticsData[2].value = statistics.totalUsers;
-    statisticsData[3].value = statistics.totalOrders;
-    statisticsData[4].value = `${parseInt(statistics.totalRevenue).toLocaleString('id-ID')}`;
+    const { data: statistics, isPending, isError } = useStatistics();
+
+    if (isError) return <ErrorComponent />;
+
+    if (isPending || !statistics) return <div className="flex justify-center items-center h-full">Loading...</div>;
+
+    statisticsData[0].value = statistics.data.statistics.totalProducts;
+    statisticsData[1].value = statistics.data.statistics.totalCategories;
+    statisticsData[2].value = statistics.data.statistics.totalUsers;
+    statisticsData[3].value = statistics.data.statistics.totalOrders;
+    statisticsData[4].value = `${parseInt(statistics.data.statistics.totalRevenue).toLocaleString('id-ID')}`;
 
     return (
         <>

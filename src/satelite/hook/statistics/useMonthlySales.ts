@@ -1,10 +1,12 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { FetchParamsStatistics } from "@/types/fetchParamsStatistics";
 import { MonthlySalesResponse } from "@/types/statistics/monthlySalesResponse";
-import axios from "axios";
+import { buildQueryString } from "@/utils/buildQueryString";
 
 export const fetchMonthlySales = async (params: FetchParamsStatistics): Promise<MonthlySalesResponse> => {
-    const response = await axios.get<MonthlySalesResponse>(process.env.NEXT_PUBLIC_BASE_URL + `/statistics/monthly-sales`, { params });
+    const queryString = buildQueryString(params || {});
+    const response = await apiClient.get<MonthlySalesResponse>(
+        `/statistics/monthly-sales?${queryString}`
+    );
     return response.data;
 };

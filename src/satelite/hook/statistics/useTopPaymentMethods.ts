@@ -1,10 +1,12 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { FetchParamsStatistics } from "@/types/fetchParamsStatistics";
 import { TopPaymentMethodsResponse } from "@/types/statistics/topPaymentMethodsResponse";
-import axios from "axios";
+import { buildQueryString } from "@/utils/buildQueryString";
 
 export const fetchTopPaymentMethods = async (params: FetchParamsStatistics): Promise<TopPaymentMethodsResponse> => {
-    const response = await axios.get<TopPaymentMethodsResponse>(process.env.NEXT_PUBLIC_BASE_URL + `/statistics/top-payment-methods`, { params });
+    const queryString = buildQueryString(params || {});
+    const response = await apiClient.get<TopPaymentMethodsResponse>(
+        `/statistics/top-payment-methods?${queryString}`
+    );
     return response.data;
 };

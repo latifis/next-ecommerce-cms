@@ -1,8 +1,9 @@
-"use server"
-
-import axios from "axios";
+import { apiClient } from "@/lib/client/axios-client";
 
 export const updateBrand = async (brand: FormData, brandId: string | undefined) => {
-  const response = await axios.put(process.env.NEXT_PUBLIC_BASE_URL + `/brands/${brandId}`, brand);
+  const response = await apiClient.put(
+    `/brands/${brandId}`,
+    brand
+  );
   return response.data;
 };

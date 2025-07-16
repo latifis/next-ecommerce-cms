@@ -1,9 +1,12 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { Category } from "@/types/category/category";
-import axios from "axios";
 
-export const addCategory = async (category: Category) => {
-  const response = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + "/categories", category);
+export const addCategory = async (
+  category: Category
+) => {
+  const response = await apiClient.post(
+    `/categories`,
+    category
+  );
   return response.data;
 };

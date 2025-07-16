@@ -1,9 +1,9 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { ItemsOrderByIdResponse } from "@/types/order/itemsOrderByIdResponse";
-import axios from "axios";
 
 export const fetchItemsOrderById = async (orderId: string | undefined): Promise<ItemsOrderByIdResponse> => {
-    const response = await axios.get<ItemsOrderByIdResponse>(process.env.NEXT_PUBLIC_BASE_URL + `/orders/items/${orderId}`);
+    const response = await apiClient.get<ItemsOrderByIdResponse>(
+        `/orders/items/${orderId}`
+    );
     return response.data;
 };

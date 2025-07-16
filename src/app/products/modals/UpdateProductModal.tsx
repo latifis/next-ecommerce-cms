@@ -8,8 +8,6 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { decodeToken } from "@/utils/decodeToken";
-import Cookies from 'js-cookie';
 import { useBrands } from "@/satelite/services/brandService";
 
 type UpdateProductModalProps = {
@@ -38,7 +36,6 @@ export default function UpdateProductModal({
     const [minQuantityForDiscount, setMinQuantityForDiscount] = useState<number>(10);
     const [bulkDiscountPrice, setBulkDiscountPrice] = useState<number>(2000);
 
-    const decodedToken = decodeToken(Cookies.get("token"))
     const units = [
         'Piece',
         'Box',
@@ -125,7 +122,7 @@ export default function UpdateProductModal({
             return;
         }
 
-        if (!productIdToUpdate || !decodedToken?.email) return <ErrorComponent />
+        if (!productIdToUpdate) return <ErrorComponent />
 
         const updatedProduct = new FormData();
         updatedProduct.append("name", name);
@@ -134,7 +131,6 @@ export default function UpdateProductModal({
         updatedProduct.append("stock", stock.toString());
         updatedProduct.append("categoryId", categoryId);
         updatedProduct.append("brandId", brandId);
-        updatedProduct.append("updatedBy", decodedToken?.email);
         updatedProduct.append("unit", unit);
         updatedProduct.append("discountPercentage", discountPercentage.toString());
         updatedProduct.append("minQuantityForDiscount", minQuantityForDiscount.toString());

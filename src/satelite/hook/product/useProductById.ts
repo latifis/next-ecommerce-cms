@@ -1,9 +1,9 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { ProductByIdResponse } from "@/types/product/productByIdResponse";
-import axios from "axios";
 
 export const fetchProductById = async (productId: string | undefined): Promise<ProductByIdResponse> => {
-    const response = await axios.get<ProductByIdResponse>(process.env.NEXT_PUBLIC_BASE_URL + `/product/${productId}`);
+    const response = await apiClient.get<ProductByIdResponse>(
+        `/product/${productId}`
+    );
     return response.data;
 };

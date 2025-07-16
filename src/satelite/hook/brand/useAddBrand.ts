@@ -1,8 +1,11 @@
-"use server"
+import { apiClient } from "@/lib/client/axios-client";
 
-import axios from "axios";
-
-export const addBrand = async (brand: FormData) => {
-  const response = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + "/brands", brand);
+export const addBrand = async (
+  brand: FormData
+) => {
+  const response = await apiClient.post(
+    `/brands`,
+    brand
+  );
   return response.data;
 };

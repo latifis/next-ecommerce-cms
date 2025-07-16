@@ -1,9 +1,9 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { CategoryByIdResponse } from "@/types/category/categoryByIdResponse";
-import axios from "axios";
 
 export const fetchCategoryById = async (categoryId: string | undefined): Promise<CategoryByIdResponse> => {
-    const response = await axios.get<CategoryByIdResponse>(process.env.NEXT_PUBLIC_BASE_URL + `/categories/${categoryId}`);
+    const response = await apiClient.get<CategoryByIdResponse>(
+        `/categories/${categoryId}`
+    );
     return response.data;
 };

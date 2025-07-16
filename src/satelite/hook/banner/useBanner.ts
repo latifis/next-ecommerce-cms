@@ -1,10 +1,12 @@
-"use server"
-
+import { apiClient } from "@/lib/client/axios-client";
 import { BannersResponse } from "@/types/banner/bannerResponse";
 import { FetchParams } from "@/types/fetchParams";
-import axios from "axios";
+import { buildQueryString } from "@/utils/buildQueryString";
 
 export const fetchBanner = async (params: FetchParams): Promise<BannersResponse> => {
-    const response = await axios.get<BannersResponse>(process.env.NEXT_PUBLIC_BASE_URL + "/media", { params });
+    const queryString = buildQueryString(params || {});
+    const response = await apiClient.get<BannersResponse>(
+        `/media?${queryString}`
+    );
     return response.data;
-}
+};

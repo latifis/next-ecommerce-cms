@@ -1,7 +1,11 @@
-"use server"
-import axios from "axios";
+import { apiClient } from "@/lib/client/axios-client";
 
-export const addBanner = async (banner: FormData) => {
-  const response = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + "/media", banner);
+export const addBanner = async (
+  banner: FormData
+) => {
+  const response = await apiClient.post(
+    `/media`,
+    banner
+  );
   return response.data;
 };

@@ -3,14 +3,11 @@
 import ErrorComponent from "@/components/Error";
 import { useCategories } from "@/satelite/services/categoryService";
 import { useAddProduct } from "@/satelite/services/productService";
-import { decodeToken } from "@/utils/decodeToken";
-import Cookies from 'js-cookie';
 import { AxiosError } from "axios";
 import Image from "next/image";
 import React, { useState } from "react";
 import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { DEFAULT_USER_NAME } from "@/lib/constant";
 import { useBrands } from "@/satelite/services/brandService";
 
 type AddProductModalProps = {
@@ -36,7 +33,6 @@ export default function AddProductModal({
     const [minQuantityForDiscount, setMinQuantityForDiscount] = useState<number>(10);
     const [bulkDiscountPrice, setBulkDiscountPrice] = useState<number>(2000);
 
-    const decodedToken = decodeToken(Cookies.get("token"))
     const units = [
         'Piece',
         'Box',
@@ -132,7 +128,6 @@ export default function AddProductModal({
         newProduct.append("discountPercentage", discountPercentage.toString());
         newProduct.append("minQuantityForDiscount", minQuantityForDiscount.toString());
         newProduct.append("bulkDiscountPrice", bulkDiscountPrice.toString());
-        newProduct.append("createdBy", decodedToken?.email ?? DEFAULT_USER_NAME)
         if (imageFile) {
             newProduct.append("file", imageFile);
         }

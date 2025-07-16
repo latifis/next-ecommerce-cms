@@ -1,10 +1,16 @@
-"use server"
-
 import { OrdersResponse } from "@/types/order/ordersResponse";
-import axios from "axios";
 import { FetchParamsOrders } from "@/types/fetchParamsOrders";
+import { apiClient } from "@/lib/client/axios-client";
+import { buildQueryString } from "@/utils/buildQueryString";
 
 export const fetchOrders = async (params: FetchParamsOrders): Promise<OrdersResponse> => {
-    const response = await axios.get<OrdersResponse>(process.env.NEXT_PUBLIC_BASE_URL + "/orders", { params });
-    return response.data;
+    try {
+        const queryString = buildQueryString(params || {});
+        const response = await apiClient.get<OrdersResponse>(
+            `/orders?${queryString}`
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
 };
