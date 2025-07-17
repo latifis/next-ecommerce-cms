@@ -59,7 +59,7 @@ export default function BannerPage() {
     }
     return (
         <>
-            <div className="p-8 bg-gray-50 min-h-screen space-y-8">
+            <div className="p-8 min-h-screen space-y-8">
                 <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-bold text-gray-800">Manage Banner</h1>
                     <button

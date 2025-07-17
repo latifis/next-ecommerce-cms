@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { AxiosError } from "axios";
 import { api } from "@/lib/axios";
 import { serialize } from "cookie";
+import { verifyToken } from "@/lib/auth";
+import { DecodedToken } from "@/types/decodedToken";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -11,6 +13,14 @@ export async function POST(req: NextRequest) {
             body
         );
         const token = response.data.token;
+        const payload = await verifyToken(token) as DecodedToken | null;
+
+        if (!payload || payload.role?.toUpperCase() !== "ADMIN") {
+            return NextResponse.json(
+                { status: "error", message: "Invalid token" },
+                { status: 401 }
+            );
+        }
 
         const res = NextResponse.json(
             { status: "success", data: response.data },

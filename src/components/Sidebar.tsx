@@ -7,12 +7,17 @@ import Cookies from 'js-cookie';
 import { decodeToken } from "@/utils/decodeToken";
 import { capitalizeWords } from "@/utils/stringUtils";
 import { useRouter } from "next/navigation";
+import { apiClient } from "@/lib/client/axios-client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 type SidebarProps = {
   setIsOpen: (isOpen: boolean) => void;
 };
 
 export default function Sidebar({ setIsOpen }: SidebarProps) {
+  const queryClient = useQueryClient();
+
   const [isOpen, setLocalIsOpen] = useState(false);
   const decodedToken = decodeToken(Cookies.get("token"))
 
@@ -26,10 +31,21 @@ export default function Sidebar({ setIsOpen }: SidebarProps) {
 
   const router = useRouter();
 
-  const handleLogout = () => {
-    Cookies.remove('token');
-    setIsOpen(false);
-    router.push('/login');
+  const handleLogout = async () => {
+    try {
+      const message = await apiClient.post("/user/logout", {}, {
+        withCredentials: true,
+      });
+
+      queryClient.removeQueries({ queryKey: ["profile"] });
+      toast.success(message.data.message || "Logout successful");
+
+      setIsOpen(false);
+
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
   };
 
   return (

@@ -67,7 +67,7 @@ export default function ProductPage() {
 
     return (
         <>
-            <div className="p-8 bg-gray-50 min-h-screen space-y-8">
+            <div className="p-8 min-h-screen space-y-8">
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-bold text-gray-800">Manage Products</h1>

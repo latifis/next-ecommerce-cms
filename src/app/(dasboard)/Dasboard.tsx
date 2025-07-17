@@ -4,7 +4,7 @@ import StatisticsOrders from "./StatisticsOrder";
 
 export default async function Dashboard() {
     return (
-        <div className="min-h-screen bg-gray-100 text-gray-800 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen text-gray-800 p-4 sm:p-6 lg:p-8">
             {/* Statistics Section */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
                 <StatisticsOrders />

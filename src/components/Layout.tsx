@@ -25,20 +25,28 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-screen w-screen">
-        {!isLoginOrRegisterPage && <Sidebar setIsOpen={setIsOpen} />}
+      <div className="relative h-screen w-screen">
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <div className="absolute inset-0 bg-[url('/images/patterns/flower.webp')] bg-cover bg-no-repeat opacity-80" />
+          <div className="absolute inset-0 bg-white opacity-70" />
+        </div>
+        
+        <div className="flex h-full w-full relative z-10">
+          {!isLoginOrRegisterPage && <Sidebar setIsOpen={setIsOpen} />}
 
-        <div
-          className={`flex-1 flex flex-col transition-all duration-300 ${isOpen && !isLoginOrRegisterPage
+          <div
+            className={`flex-1 flex flex-col transition-all duration-300 ${isOpen && !isLoginOrRegisterPage
               ? "ml-64"
               : isLoginOrRegisterPage
-                ? null
+                ? ""
                 : "ml-16"
-            }`}
-        >
-          <main className="flex-1 p-4 bg-gray-50 overflow-y-auto">{children}</main>
+              }`}
+          >
+            <main className="flex-1 p-4 overflow-y-auto">{children}</main>
+          </div>
         </div>
       </div>
+
       <ToastContainer className="z-50" />
     </QueryClientProvider>
   );
