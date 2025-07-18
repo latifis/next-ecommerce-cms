@@ -1,6 +1,6 @@
 import { User } from "./user";
 
-export interface UserResponse {
+export interface UserByIdResponse {
     status: string;
     message: string;
     data: User;

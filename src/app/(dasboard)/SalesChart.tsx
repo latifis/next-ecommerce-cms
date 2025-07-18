@@ -23,6 +23,7 @@ import {
     useTopSellingProducts
 } from "@/satelite/services/statisticService";
 import ErrorComponent from "@/components/Error";
+import SalesChartSkeleton from "@/components/skeletons/dashboard/SalesChartSkeleton";
 
 Chart.register(
     LineController,
@@ -238,11 +239,7 @@ export default function SalesChart() {
         isPendingTopSellingProducts ||
         isPendingTopCategories ||
         isPendingTopPaymentMethods
-    ) return (
-        <div className="flex justify-center items-center h-full">
-            Loading...
-        </div>
-    );
+    ) return <SalesChartSkeleton />;
 
     return (
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 mx-2">

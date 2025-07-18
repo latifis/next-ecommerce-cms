@@ -11,3 +11,4 @@ export const DEFAULT_USER_NAME = 'user@error.com';
 export const DEFAULT_PRODUCT_URL = '/images/default-product.png'
 export const DEFAULT_IMAGE_URL = '/images/default-product-image.webp';
 export const DEFAULT_BRAND_URL = '/images/default-brand-image.webp';
+export const DEFAULT_USER_URL = '/images/default-profile.png';

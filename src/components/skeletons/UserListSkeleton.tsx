@@ -1,6 +1,6 @@
 "use client";
 
-const CategoryListSkeleton = () => {
+const UserListSkeleton = () => {
     return (
         <>
             {Array.from({ length: 3 }).map((_, index) => (
@@ -20,6 +20,12 @@ const CategoryListSkeleton = () => {
                     <td className="px-6 py-4">
                         <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
                     </td>
+                    <td className="px-6 py-4">
+                        <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                        <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
+                    </td>
                     <td className="px-6 py-4 text-right">
                         <div className="flex justify-end">
                             <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
@@ -31,4 +37,4 @@ const CategoryListSkeleton = () => {
     );
 };
 
-export default CategoryListSkeleton;
+export default UserListSkeleton;

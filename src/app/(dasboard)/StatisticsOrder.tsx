@@ -1,6 +1,7 @@
 "use client";
 
 import ErrorComponent from "@/components/Error";
+import StatisticsSkeleton from "@/components/skeletons/dashboard/StatisticsSkeleton";
 import { useStatistics } from "@/satelite/services/statisticService";
 import Link from "next/link";
 import { FaBox, FaShoppingCart, FaTags, FaUsers } from "react-icons/fa";
@@ -12,7 +13,7 @@ export default function StatisticsOrders() {
 
     if (isError) return <ErrorComponent />;
 
-    if (isPending || !statistics) return <div className="flex justify-center items-center h-full">Loading...</div>;
+    if (isPending || !statistics) return <StatisticsSkeleton />;
 
     statisticsData[0].value = statistics.data.statistics.totalProducts;
     statisticsData[1].value = statistics.data.statistics.totalCategories;

@@ -1,6 +1,7 @@
 "use client"
 
 import ErrorComponent from "@/components/Error";
+import RecentOrdersSkeleton from "@/components/skeletons/dashboard/RecentOrdersSkeleton";
 import { useOrders } from "@/satelite/services/orderService";
 import { formatDate } from "@/utils/formatDate";
 import { formatTime } from "@/utils/formatTime";
@@ -21,7 +22,7 @@ export default function RecentOrders() {
 
     if (isError) return <ErrorComponent />;
 
-    if (isPending) return <div className="text-center text-gray-500">Loading...</div>;
+    if (isPending) return <RecentOrdersSkeleton />;
 
     return (
         <>

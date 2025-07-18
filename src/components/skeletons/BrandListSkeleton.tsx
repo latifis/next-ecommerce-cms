@@ -1,6 +1,6 @@
 "use client";
 
-const CategoryListSkeleton = () => {
+const BrandListSkeleton = () => {
     return (
         <>
             {Array.from({ length: 3 }).map((_, index) => (
@@ -31,4 +31,4 @@ const CategoryListSkeleton = () => {
     );
 };
 
-export default CategoryListSkeleton;
+export default BrandListSkeleton;

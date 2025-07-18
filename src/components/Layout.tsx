@@ -27,8 +27,8 @@ export default function Layout({ children }: LayoutProps) {
     <QueryClientProvider client={queryClient}>
       <div className="relative h-screen w-screen">
         <div className="fixed inset-0 z-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[url('/images/patterns/flower.webp')] bg-cover bg-no-repeat opacity-80" />
-          <div className="absolute inset-0 bg-white opacity-70" />
+          <div className="absolute inset-0 bg-[url('/images/patterns/flower.webp')] bg-cover bg-no-repeat opacity-90" />
+          <div className="absolute inset-0 bg-white opacity-80" />
         </div>
         
         <div className="flex h-full w-full relative z-10">

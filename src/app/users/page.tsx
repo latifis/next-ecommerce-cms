@@ -1,0 +1,115 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { User } from "@/types/user/user";
+import UserSearchSort from "./UserSearchSort";
+import UserList from "./UserList";
+import Pagination from "@/components/Pagination";
+import { useUsers } from "@/satelite/services/userService";
+import ErrorComponent from "@/components/Error";
+import UpdateUserModal from "./modals/UpdateUserModal";
+import DetailUserModal from "./modals/DetailUserModal";
+
+export default function UserPage() {
+    const [search, setSearch] = useState("");
+    const [sortField, setSortField] = useState<keyof User>("name");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+
+    const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
+    const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+    const [userIdDetail, setUserIdDetail] = useState<string | undefined>("");
+    const [userIdToUpdate, setUserIdToUpdate] = useState<string | undefined>("");
+
+    const [users, setUsers] = useState<User[]>([]);
+    const [totalItems, setTotalItems] = useState(0);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, sortField, sortOrder, pageSize]);
+
+    const filters = {
+        page: currentPage,
+        limit: pageSize,
+        search,
+        sortField,
+        sortOrder,
+    };
+
+    const { data, isLoading, isError, refetch } = useUsers(filters);
+
+    useEffect(() => {
+        if (data) {
+            setUsers(data.data.data || []);
+            setTotalItems(data.data.meta.totalItems || 0);
+        }
+    }, [data]);
+
+    const handleClickDetail = (userId: string | undefined) => {
+        setIsModalDetailOpen(true);
+        setUserIdDetail(userId);
+    };
+
+    const handleUpdateUser = (userId: string | undefined) => {
+        setIsModalUpdateOpen(true);
+        setUserIdToUpdate(userId);
+    };
+    if (isError) return <ErrorComponent />;
+
+    return (
+        <>
+            <div className="p-8 min-h-screen space-y-8">
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold text-gray-800">Manage Users</h1>
+                </div>
+
+                {/* Search and Sort */}
+                <UserSearchSort
+                    search={search}
+                    setSearch={setSearch}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                    setSortField={setSortField}
+                    setSortOrder={setSortOrder}
+                    setPageSize={setPageSize}
+                />
+
+                {/* User Table */}
+                <UserList
+                    onUpdate={handleUpdateUser}
+                    onClickDetail={handleClickDetail}
+                    onLoading={isLoading}
+                    users={users}
+                    search={search}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                    currentPage={currentPage}
+                    pageSize={pageSize}
+                />
+
+                {/* Pagination */}
+                <Pagination
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    totalItems={totalItems}
+                    pageSize={pageSize}
+                />
+            </div>
+
+            <UpdateUserModal
+                isOpen={isModalUpdateOpen}
+                userIdToUpdate={userIdToUpdate}
+                onClose={() => setIsModalUpdateOpen(false)}
+                onDone={refetch}
+            />
+
+            <DetailUserModal
+                isOpen={isModalDetailOpen}
+                userId={userIdDetail}
+                onClose={() => setIsModalDetailOpen(false)}
+            />
+        </>
+    );
+}

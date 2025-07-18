@@ -1,7 +1,7 @@
 "use client";
 
 const BannerListSkeleton = () => {
-    return(
+    return (
         <>
             {Array.from({ length: 5 }).map((_, index) => (
                 <tr key={index} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-t`}>
@@ -13,6 +13,9 @@ const BannerListSkeleton = () => {
                     </td>
                     <td className="px-6 py-4">
                         <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
                     </td>
                     <td className="px-6 py-4">
                         <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
