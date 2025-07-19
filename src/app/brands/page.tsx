@@ -69,7 +69,12 @@ export default function BrandPage() {
             <div className="p-8 min-h-screen space-y-8">
                 {/* Header */}
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800">Manage Brands</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800">Manage Brands</h1>
+                        <p className="text-gray-600 text-sm mt-2">
+                            Manage brand information to maintain product identity and trust.
+                        </p>
+                    </div>
                     <button
                         onClick={handleAddBrand}
                         className="flex items-center gap-2 bg-blue-100 text-blue-700 px-6 py-3 rounded-lg shadow hover:bg-blue-200"

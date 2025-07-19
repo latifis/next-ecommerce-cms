@@ -156,11 +156,6 @@ export default function ProductList({
                                     >
                                         <FaEdit />
                                     </button>
-                                    {/* <button
-                                        className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 px-3 py-2 rounded mx-2"
-                                    >
-                                        <FaTrash />
-                                    </button> */}
                                 </td>
                             </tr>
                         ))

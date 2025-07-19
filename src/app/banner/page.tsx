@@ -54,14 +54,19 @@ export default function BannerPage() {
         setIsModalUpdateOpen(true);
     }
 
-    if (isError){
-        return <ErrorComponent/>
+    if (isError) {
+        return <ErrorComponent />
     }
     return (
         <>
             <div className="p-8 min-h-screen space-y-8">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800">Manage Banner</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800">Manage Banner</h1>
+                        <p className="text-gray-600 text-sm mt-2">
+                            Create and update promotional banners to boost visibility and sales.
+                        </p>
+                    </div>
                     <button
                         onClick={handleAddBanner}
                         className="flex items-center gap-2 bg-blue-100 text-blue-700 px-6 py-3 rounded-lg shadow hover:bg-blue-200"

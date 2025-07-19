@@ -29,7 +29,7 @@ export default function OrderPage() {
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
     const [orderIdDetail, setOrderIdDetail] = useState<string | undefined>("");
     const [orderIdToUpdate, setOrderIdToUpdate] = useState<string | undefined>("");
-    
+
     const [filterOrderStatus, setOrderStatusFilter] = useState<OrderStatus | null>(null);
     const [filterPaymentStatus, setPaymentStatusFilter] = useState<PaymentStatus | null>(null);
     const [filterPaymentMethod, setPaymentMethodFilter] = useState<PaymentMethod | null>(null);
@@ -85,7 +85,12 @@ export default function OrderPage() {
             <div className="p-8 min-h-screen space-y-8">
                 {/* Header */}
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800">Manage Orders</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800">Manage Orders</h1>
+                        <p className="text-gray-600 text-sm mt-2">
+                            Track, update, and manage customer orders efficiently.
+                        </p>
+                    </div>
                 </div>
 
                 {/* Search and Sort */}

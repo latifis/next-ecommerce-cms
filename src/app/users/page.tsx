@@ -66,7 +66,12 @@ export default function UserPage() {
             <div className="p-8 min-h-screen space-y-8">
                 {/* Header */}
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800">Manage Users</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800">Manage Users</h1>
+                        <p className="text-gray-600 text-sm mt-2">
+                            View, add, and manage users with different roles and statuses.
+                        </p>
+                    </div>
                 </div>
 
                 {/* Search and Sort */}
@@ -102,7 +107,7 @@ export default function UserPage() {
                     totalItems={totalItems}
                     pageSize={pageSize}
                 />
-            </div>
+            </div >
 
             <UpdateUserModal
                 isOpen={isModalUpdateOpen}
