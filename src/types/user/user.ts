@@ -13,6 +13,7 @@ export interface User {
     gender: Gender;
     profileImageUrl: string;
     languagePreference: Language;
+    isActive: boolean;
     createdAt: string;
     updatedAt: string;
 }

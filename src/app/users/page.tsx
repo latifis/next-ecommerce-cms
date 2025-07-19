@@ -9,6 +9,7 @@ import { useUsers } from "@/satelite/services/userService";
 import ErrorComponent from "@/components/Error";
 import UpdateUserModal from "./modals/UpdateUserModal";
 import DetailUserModal from "./modals/DetailUserModal";
+import { UserRole } from "@/enum/userRole";
 
 export default function UserPage() {
     const [search, setSearch] = useState("");
@@ -20,18 +21,21 @@ export default function UserPage() {
     const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
     const [userIdDetail, setUserIdDetail] = useState<string | undefined>("");
-    const [userIdToUpdate, setUserIdToUpdate] = useState<string | undefined>("");
+    const [userIdToUpdate, setUserIdToUpdate] = useState<string>("");
+
+    const [filterUserRole, setFilterUserRole] = useState<UserRole | null>(null);
 
     const [users, setUsers] = useState<User[]>([]);
     const [totalItems, setTotalItems] = useState(0);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, sortField, sortOrder, pageSize]);
+    }, [search, sortField, sortOrder, pageSize, filterUserRole]);
 
     const filters = {
         page: currentPage,
         limit: pageSize,
+        filterUserRole: filterUserRole,
         search,
         sortField,
         sortOrder,
@@ -51,7 +55,7 @@ export default function UserPage() {
         setUserIdDetail(userId);
     };
 
-    const handleUpdateUser = (userId: string | undefined) => {
+    const handleUpdateUser = (userId: string) => {
         setIsModalUpdateOpen(true);
         setUserIdToUpdate(userId);
     };
@@ -74,6 +78,8 @@ export default function UserPage() {
                     setSortField={setSortField}
                     setSortOrder={setSortOrder}
                     setPageSize={setPageSize}
+                    userRole={filterUserRole}
+                    setFilterUserRole={setFilterUserRole}
                 />
 
                 {/* User Table */}

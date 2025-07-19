@@ -26,6 +26,6 @@ export const useUserById = (userId: string | undefined) => {
 
 export const useUpdateUser = () => {
   return useMutation({
-    mutationFn: (user: User) => updateUser(user)
+    mutationFn: (user: Partial<User>) => updateUser(user)
   });
 };

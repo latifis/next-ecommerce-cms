@@ -2,7 +2,8 @@
 
 import { FaSort } from "react-icons/fa";
 import { User } from "@/types/user/user";
-import { CATEGORY_SORT_FIELDS, SORT_ORDER_ASC, SORT_ORDER_DESC } from "@/lib/constant";
+import { SORT_ORDER_ASC, SORT_ORDER_DESC, USER_SORT_FIELDS } from "@/lib/constant";
+import { UserRole } from "@/enum/userRole";
 
 type UserSearchSortProps = {
     search: string;
@@ -12,6 +13,8 @@ type UserSearchSortProps = {
     setSortField: React.Dispatch<React.SetStateAction<keyof User>>;
     setSortOrder: React.Dispatch<React.SetStateAction<typeof SORT_ORDER_ASC | typeof SORT_ORDER_DESC>>;
     setPageSize: React.Dispatch<React.SetStateAction<number>>;
+    userRole: UserRole | null;
+    setFilterUserRole: React.Dispatch<React.SetStateAction<UserRole | null>>;
 };
 
 export default function UserSearchSort({
@@ -22,6 +25,8 @@ export default function UserSearchSort({
     setSortField,
     setSortOrder,
     setPageSize,
+    userRole,
+    setFilterUserRole,
 }: UserSearchSortProps) {
     const toggleSortOrder = (field: keyof User) => {
         if (sortField === field) {
@@ -47,7 +52,7 @@ export default function UserSearchSort({
             />
             <div className="flex items-center gap-4">
                 <span className="text-gray-600 font-medium">Sort By:</span>
-                {CATEGORY_SORT_FIELDS.map((field) => (
+                {USER_SORT_FIELDS.map((field) => (
                     <button
                         key={field}
                         onClick={() => toggleSortOrder(field as keyof User)}
@@ -66,6 +71,26 @@ export default function UserSearchSort({
                         )}
                     </button>
                 ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4">
+                <div className="flex gap-2 items-center">
+                    <span className="text-gray-600 font-medium">Filters:</span>
+                    <div className="flex gap-2">
+                        <select
+                            onChange={(e) => setFilterUserRole(e.target.value as null | UserRole)}
+                            value={userRole || ""}
+                            className="px-2 py-1 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                            <option value="">User Role</option>
+                            {Object.keys(UserRole).map((role) => (
+                                <option key={role} value={role}>
+                                    {role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {/* Dropdown for page size */}

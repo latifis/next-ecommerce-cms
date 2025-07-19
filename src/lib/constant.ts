@@ -3,6 +3,7 @@ export const BRAND_SORT_FIELDS = ["name", "description", "updatedAt"];
 export const PROUDCT_SORT_FIELDS = ["name", "price", "stock", "updatedAt"];
 export const BANNER_SORT_FIELDS = ["name", "updatedAt"];
 export const ORDER_SORT_FIELDS = ["updatedAt"];
+export const USER_SORT_FIELDS = ["name", "email", "phone", "updatedAt"];
 
 export const SORT_ORDER_ASC = 'asc';
 export const SORT_ORDER_DESC = 'desc';
