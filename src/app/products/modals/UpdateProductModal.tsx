@@ -35,6 +35,7 @@ export default function UpdateProductModal({
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
     const [minQuantityForDiscount, setMinQuantityForDiscount] = useState<number>(10);
     const [bulkDiscountPrice, setBulkDiscountPrice] = useState<number>(2000);
+    const [code, setCode] = useState("");
 
     const units = [
         'Piece',
@@ -77,6 +78,7 @@ export default function UpdateProductModal({
         setDiscountPercentage(0);
         setMinQuantityForDiscount(10);
         setBulkDiscountPrice(2000);
+        setCode("");
     }
 
     const filters = {
@@ -105,6 +107,7 @@ export default function UpdateProductModal({
             setDiscountPercentage(product.data.discountPercentage || 0);
             setMinQuantityForDiscount(product.data.minQuantityForDiscount || 0);
             setBulkDiscountPrice(product.data.bulkDiscountPrice || 0);
+            setCode(product.data.code || "");
         }
     }, [isOpen, product]);
 
@@ -119,6 +122,12 @@ export default function UpdateProductModal({
             return;
         } else if (!brandId) {
             toast.error("Please enter a product brand.");
+            return;
+        } else if (!code) {
+            toast.error("Please enter a product code.");
+            return;
+        } else if (bulkDiscountPrice >= price) {
+            toast.error("Bulk discount price must be less than the regular price.");
             return;
         }
 
@@ -135,6 +144,7 @@ export default function UpdateProductModal({
         updatedProduct.append("discountPercentage", discountPercentage.toString());
         updatedProduct.append("minQuantityForDiscount", minQuantityForDiscount.toString());
         updatedProduct.append("bulkDiscountPrice", bulkDiscountPrice.toString());
+        updatedProduct.append("code", code);
 
         if (imageFile) {
             updatedProduct.append("file", imageFile);
@@ -197,6 +207,23 @@ export default function UpdateProductModal({
                         />
                     </div>
 
+                    {/* Product Code */}
+                    <div>
+                        <label htmlFor="code" className="block text-sm font-bold text-gray-700">
+                            Product Code <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="code"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            placeholder="Enter product code"
+                            required
+                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
+                        />
+                    </div>
+
                     {/* Product Description */}
                     <div>
                         <label htmlFor="description" className="block text-sm font-bold text-gray-700">
@@ -227,6 +254,7 @@ export default function UpdateProductModal({
                             placeholder="Enter product price"
                             required
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
                         />
                     </div>
@@ -265,6 +293,7 @@ export default function UpdateProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product discount percentage"
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
                         />
                     </div>
@@ -282,6 +311,7 @@ export default function UpdateProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product minimum quantity for discount"
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
                         />
                     </div>
@@ -299,6 +329,7 @@ export default function UpdateProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product bulk discount price"
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
                         />
                     </div>
@@ -317,6 +348,7 @@ export default function UpdateProductModal({
                             placeholder="Enter product stock"
                             required
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
                         />
                     </div>

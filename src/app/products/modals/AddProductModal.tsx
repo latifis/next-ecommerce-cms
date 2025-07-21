@@ -5,7 +5,7 @@ import { useCategories } from "@/satelite/services/categoryService";
 import { useAddProduct } from "@/satelite/services/productService";
 import { AxiosError } from "axios";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useBrands } from "@/satelite/services/brandService";
@@ -13,13 +13,17 @@ import { useBrands } from "@/satelite/services/brandService";
 type AddProductModalProps = {
     isOpen: boolean;
     onClose: React.Dispatch<React.SetStateAction<boolean>>;
-    onDone: () => void;
+    onDone?: () => void;
+    onDirectAdd?: (code: string) => void;
+    initialCode?: string;
 };
 
 export default function AddProductModal({
     isOpen,
     onClose,
     onDone,
+    onDirectAdd,
+    initialCode = "",
 }: AddProductModalProps) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -32,6 +36,7 @@ export default function AddProductModal({
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
     const [minQuantityForDiscount, setMinQuantityForDiscount] = useState<number>(10);
     const [bulkDiscountPrice, setBulkDiscountPrice] = useState<number>(2000);
+    const [code, setCode] = useState("");
 
     const units = [
         'Piece',
@@ -73,6 +78,7 @@ export default function AddProductModal({
         setDiscountPercentage(0);
         setMinQuantityForDiscount(10);
         setBulkDiscountPrice(2000);
+        setCode("");
     }
 
     const filters = {
@@ -115,6 +121,12 @@ export default function AddProductModal({
         } else if (!brandId) {
             toast.error("Please enter a product brand.");
             return;
+        } else if (!code) {
+            toast.error("Please enter a product code.");
+            return;
+        } else if (bulkDiscountPrice >= price) {
+            toast.error("Bulk discount price must be less than the regular price.");
+            return;
         }
 
         const newProduct = new FormData();
@@ -131,11 +143,13 @@ export default function AddProductModal({
         if (imageFile) {
             newProduct.append("file", imageFile);
         }
+        newProduct.append("code", code);
 
         addProduct(newProduct, {
-            onSuccess: () => {
+            onSuccess: (data) => {
                 toast.success("Product added successfully.");
-                onDone();
+                if (onDone) onDone();
+                if (onDirectAdd) onDirectAdd(data.data.code);
                 resetValue();
                 onClose(false);
             },
@@ -150,6 +164,12 @@ export default function AddProductModal({
             }
         });;
     };
+
+    useEffect(() => {
+        if (isOpen) {
+            setCode(initialCode);
+        }
+    }, [initialCode, isOpen]);
 
     if (!isOpen) return null;
 
@@ -205,6 +225,23 @@ export default function AddProductModal({
                         ></textarea>
                     </div>
 
+                    {/* Product Code */}
+                    <div>
+                        <label htmlFor="code" className="block text-sm font-bold text-gray-700">
+                            Product Code <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="code"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            placeholder="Enter product code"
+                            required
+                            disabled={isLoading || isLoadingBrand}
+                        />
+                    </div>
+
                     {/* Product Price */}
                     <div>
                         <label htmlFor="price" className="block text-sm font-bold text-gray-700">
@@ -219,6 +256,7 @@ export default function AddProductModal({
                             placeholder="Enter product price"
                             required
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingBrand}
                         />
                     </div>
@@ -257,6 +295,7 @@ export default function AddProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product discount percentage"
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingBrand}
                         />
                     </div>
@@ -274,6 +313,7 @@ export default function AddProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product min quantity for discount"
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingBrand}
                         />
                     </div>
@@ -291,6 +331,7 @@ export default function AddProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product bulk discount price"
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingBrand}
                         />
                     </div>
@@ -309,6 +350,7 @@ export default function AddProductModal({
                             placeholder="Enter product stock"
                             required
                             min="0"
+                            onWheel={(e) => e.currentTarget.blur()}
                             disabled={isLoading || isLoadingBrand}
                         />
                     </div>

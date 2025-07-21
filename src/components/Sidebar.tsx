@@ -44,7 +44,7 @@ export default function Sidebar({ setIsOpen }: SidebarProps) {
       title: "Orders",
       items: [
         { name: "Order List", icon: <FaShoppingCart />, path: "/orders" },
-        { name: "Input Order", icon: <FaClipboardList />, path: "/admin-orders" },
+        { name: "Input Order", icon: <FaClipboardList />, path: "/orders/create" },
       ],
     },
     {

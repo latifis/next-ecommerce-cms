@@ -1,5 +1,5 @@
 export interface Product {
-    id?: string;
+    id: string;
     name: string;
     description: string;
     price: number;
@@ -19,4 +19,5 @@ export interface Product {
     discountPercentage: number;
     minQuantityForDiscount: number;
     bulkDiscountPrice: number;
+    code: string;
 }

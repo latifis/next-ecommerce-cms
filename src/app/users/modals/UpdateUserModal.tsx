@@ -42,7 +42,6 @@ export default function UpdateUserModal({
     useEffect(() => {
         if (isOpen && user) {
             setRole(user.data.role || UserRole.USER);
-            console.log("User data:", user.data);
             setIsActive(user.data.isActive);
         }
     }, [isOpen, user]);

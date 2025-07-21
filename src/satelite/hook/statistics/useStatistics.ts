@@ -10,7 +10,6 @@ export const fetchStatistics = async (): Promise<StatisticsResponse> => {
 
         return response.data;
     } catch (error: unknown) {
-        console.log("Error fetching statistics:", error);
         if (error instanceof AxiosError) {
             if (error.response?.status === 401) {
                 throw new Error("Unauthorized. Please log in again.");

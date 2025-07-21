@@ -10,6 +10,14 @@ import { verifyPayment } from "../hook/order/useVerifyPayment";
 import { ItemsOrderByIdResponse } from "@/types/order/itemsOrderByIdResponse";
 import { fetchItemsOrderById } from "../hook/order/useItemsOrderById";
 import { preShippingCheckOrder } from "../hook/order/usePreShippingCheckOrder";
+import { CreateOrderInput } from "@/types/order/createOrderInput";
+import { addOrder } from "../hook/order/useAddOrder";
+
+export const useAddOrder = () => {
+  return useMutation({
+    mutationFn: (orderData: CreateOrderInput) => addOrder(orderData),
+  });
+};
 
 export const useOrders = (params: FetchParams) => {
   return useQuery({

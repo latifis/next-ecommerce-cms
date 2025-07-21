@@ -1,3 +1,5 @@
+import { PriceType } from "@/enum/priceType"
+
 export interface ItemsOrder {
     id: string,
     quantity: number,
@@ -9,4 +11,10 @@ export interface ItemsOrder {
         imageUrl: string,
         imageUrlInput: string
     }
+    priceAtOrder: string,
+    priceType: PriceType,
+    createdAt: string,
+    updatedAt: string,
+    orderId: string,
+    productId: string,
 }

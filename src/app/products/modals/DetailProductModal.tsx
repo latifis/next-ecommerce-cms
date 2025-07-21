@@ -49,9 +49,15 @@ export default function DetailProductModal({
                 ) : (
                     <>
                         {product && (
-                            <div className="flex items-center justify-center w-full">
+                            <div className="flex flex-col items-center justify-center w-full">
                                 {/* Product Title */}
-                                <h1 className="text-xl font-semibold text-gray-800">{product.data.name}</h1>
+                                <h1 className="text-xl font-semibold text-gray-800">
+                                    {product.data.name}
+                                </h1>
+                                {/* Product Code */}
+                                <p className="text-sm text-gray-500 italic">
+                                    {product.data.code}
+                                </p>
                             </div>
                         )}
                         {/* Image Section */}
