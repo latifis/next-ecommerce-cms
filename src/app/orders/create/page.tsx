@@ -8,6 +8,7 @@ import { CartItem } from "@/types/cart/cartItem";
 import { calculateTotalPrice } from "@/utils/productPricing";
 import { AxiosError } from "axios";
 import { useState } from "react";
+import { BsTrash2 } from "react-icons/bs";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -34,8 +35,6 @@ export default function CreateOrderPage() {
     );
 
     const handleSubmitPOS = () => {
-        if (isPending) return;
-
         const orderData = {
             items: cartItems.map((item) => ({
                 productId: item.id,
@@ -158,7 +157,18 @@ export default function CreateOrderPage() {
 
                     {/* Left: Cart Items */}
                     <div className="flex-1 bg-white rounded-2xl shadow-md border border-gray-200 p-6 space-y-4 min-h-[500px]">
-                        <h2 className="text-lg font-bold text-blue-700">Cart Items</h2>
+                        <h2 className="text-lg font-bold text-blue-700 flex items-center justify-between mx-2">
+                            Cart Items
+                            {cartItems.length > 0 && (
+                                <button
+                                    onClick={() => setCartItems([])}
+                                    className="flex items-center gap-1 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 px-3 py-1 rounded transition"
+                                >
+                                    <BsTrash2 className="w-4 h-4" />
+                                    Delete All
+                                </button>
+                            )}
+                        </h2>
                         <hr className="border-gray-200" />
                         <div className="space-y-4 h-[400px] overflow-y-auto pr-2">
                             {cartItems.length === 0 ? (
@@ -215,8 +225,12 @@ export default function CreateOrderPage() {
 
                         <div className="mt-6">
                             <button
-                                className="w-full py-3 rounded-lg bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition"
+                                className={`w-full py-3 rounded-lg font-semibold transition ${isPending || cartItems.length === 0
+                                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                        : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                    }`}
                                 onClick={handleSubmitPOS}
+                                disabled={isPending || cartItems.length === 0}
                             >
                                 Submit Order (POS)
                             </button>
