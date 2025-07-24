@@ -3,6 +3,7 @@ import { PriceType } from "@/enum/priceType";
 import { DEFAULT_PRODUCT_URL } from "@/lib/constant";
 import { CartItem } from "@/types/cart/cartItem";
 import { ProductPriceInput } from "@/types/statistics/productPriceInput";
+import { formatCurrency } from "@/utils/formatCurrency";
 import { calculateSubtotalPrice, calculateUnitPrice } from "@/utils/productPricing";
 import Image from "next/image";
 import { FaTrashCan } from "react-icons/fa6";
@@ -72,11 +73,11 @@ export default function OrderItemCard({ item, onDecrease, onIncrease, onDelete }
                         <div className="flex items-center gap-1">
                             {initalPrice && initalPrice > actualPrice && (
                                 <span className="line-through text-red-400 text-xs">
-                                    Rp {initalPrice.toLocaleString("id-ID")}
+                                    {formatCurrency(initalPrice)}
                                 </span>
                             )}
                             <span className="text-gray-800 font-medium">
-                                Rp {actualPrice.toLocaleString("id-ID")}
+                                {formatCurrency(actualPrice)}
                             </span>
                         </div>
                     </div>
@@ -105,11 +106,11 @@ export default function OrderItemCard({ item, onDecrease, onIncrease, onDelete }
                     <p className="text-sm text-gray-500">Subtotal</p>
                     <div className="flex flex-col items-center gap-0.5 mt-1">
                         <span className="text-base font-bold text-gray-900">
-                            Rp {actualSubtotalPrice.toLocaleString("id-ID")}
+                            {formatCurrency(actualSubtotalPrice)}
                         </span>
                         {initialSubTotalPrice && initialSubTotalPrice > actualSubtotalPrice && (
                             <span className="text-xs line-through text-red-400">
-                                Rp {initialSubTotalPrice.toLocaleString("id-ID")}
+                                {formatCurrency(initialSubTotalPrice)}
                             </span>
                         )}
                     </div>

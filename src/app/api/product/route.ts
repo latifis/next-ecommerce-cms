@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { api } from "@/lib/axios";
 import { cookies } from "next/headers";
+import { AxiosError } from "axios";
 
 export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
@@ -42,6 +43,12 @@ export async function POST(req: NextRequest) {
         });
     } catch (error) {
         console.error("Error adding product:", error);
+        if (error instanceof AxiosError) {
+            return NextResponse.json(
+                { message: error.response?.data.message || "Internal Server Error" },
+                { status: error.response?.status || 500 }
+            );
+        }
         return NextResponse.json(
             { message: "Internal Server Error" },
             { status: 500 }

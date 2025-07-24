@@ -12,6 +12,7 @@ import { Order } from "@/types/order/order";
 import { OrderStatus } from "@/enum/orderStatus";
 import OrderFlow from "@/components/OrderFlow";
 import AgreementCheckbox from "@/components/AgreementCheckbox";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 type PreShippingCheckModalProps = {
     orderIdToUpdate: string | undefined;
@@ -124,7 +125,7 @@ export default function PreShippingCheckModal({
                                                 <div className="text-sm text-gray-500 mt-1">
                                                     {item.quantity} x{" "}
                                                     <span className="text-gray-700 font-medium">
-                                                        {item.product?.price.toLocaleString("id-ID") ?? "N/A"}
+                                                        {formatCurrency(item.product?.price) ?? "N/A"}
                                                     </span>
                                                 </div>
                                             </div>
@@ -132,7 +133,7 @@ export default function PreShippingCheckModal({
                                             {/* Subtotal */}
                                             <div className="text-right">
                                                 <span className="text-base font-semibold text-gray-900">
-                                                    {parseInt(item.subtotal).toLocaleString("id-ID")}
+                                                    {formatCurrency(parseInt(item.subtotal))}
                                                 </span>
                                             </div>
                                         </div>

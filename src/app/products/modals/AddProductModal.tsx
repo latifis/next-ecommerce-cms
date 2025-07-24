@@ -5,10 +5,11 @@ import { useCategories } from "@/satelite/services/categoryService";
 import { useAddProduct } from "@/satelite/services/productService";
 import { AxiosError } from "axios";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useBrands } from "@/satelite/services/brandService";
+import { createPortal } from "react-dom";
 
 type AddProductModalProps = {
     isOpen: boolean;
@@ -37,6 +38,9 @@ export default function AddProductModal({
     const [minQuantityForDiscount, setMinQuantityForDiscount] = useState<number>(10);
     const [bulkDiscountPrice, setBulkDiscountPrice] = useState<number>(2000);
     const [code, setCode] = useState("");
+
+    const [mounted, setMounted] = useState(false);
+    const nameInputRef = useRef<HTMLInputElement>(null);
 
     const units = [
         'Piece',
@@ -171,11 +175,22 @@ export default function AddProductModal({
         }
     }, [initialCode, isOpen]);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen && nameInputRef.current) {
+            nameInputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    if (!mounted || !isOpen) return null;
 
     if (isError || isErrorBrand) return <ErrorComponent />
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6 md:p-8">
             <div
                 className="bg-white w-full max-w-3xl p-6 sm:p-8 rounded-xl shadow-xl relative overflow-y-auto min-h-[200px] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] md:max-h-[calc(100vh-4rem)]"
@@ -198,6 +213,7 @@ export default function AddProductModal({
                             Product Name <span className="text-red-500">*</span>
                         </label>
                         <input
+                            ref={nameInputRef}
                             type="text"
                             id="name"
                             value={name}
@@ -517,6 +533,7 @@ export default function AddProductModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

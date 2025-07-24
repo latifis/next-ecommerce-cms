@@ -9,6 +9,7 @@ import { PaymentStatus } from "@/enum/paymentStatus";
 import { OrderStatus } from "@/enum/orderStatus";
 import Image from "next/image";
 import { DEFAULT_IMAGE_URL } from "@/lib/constant";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 type DetailOrderModalProps = {
     orderId: string | undefined;
@@ -87,7 +88,7 @@ export default function DetailOrderModal({
                                     <span className="font-medium text-gray-800">Total Price:</span>
                                     <span className="text-gray-700 font-semibold">
                                         {order?.data?.order?.totalPrice
-                                            ? parseInt(order?.data?.order?.totalPrice).toLocaleString("id-ID")
+                                            ? formatCurrency(parseInt(order?.data?.order?.totalPrice))
                                             : "N/A"}
                                     </span>
                                 </div>
@@ -151,7 +152,7 @@ export default function DetailOrderModal({
                                                 <div className="text-sm text-gray-500 mt-1">
                                                     {item.quantity} x{" "}
                                                     <span className="text-gray-700 font-medium">
-                                                        {item.product?.price.toLocaleString("id-ID") ?? "N/A"}
+                                                        {formatCurrency(item.product?.price) ?? "N/A"}
                                                     </span>
                                                 </div>
                                             </div>
@@ -159,7 +160,7 @@ export default function DetailOrderModal({
                                             {/* Subtotal */}
                                             <div className="text-right">
                                                 <span className="text-sm font-semibold text-gray-900">
-                                                    {parseInt(item.subtotal).toLocaleString("id-ID")}
+                                                    {formatCurrency(parseInt(item.subtotal))}
                                                 </span>
                                             </div>
                                         </div>

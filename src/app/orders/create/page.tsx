@@ -1,24 +1,36 @@
 "use client";
 
 import AddProductModal from "@/app/products/modals/AddProductModal";
-import OrderItemCard from "@/components/card/OrderItemCard";
 import { fetchProductByCode } from "@/satelite/hook/product/useProductByCode";
 import { useAddOrder } from "@/satelite/services/orderService";
 import { CartItem } from "@/types/cart/cartItem";
+import { Product } from "@/types/product/product";
 import { calculateTotalPrice } from "@/utils/productPricing";
-import { AxiosError } from "axios";
-import { useState } from "react";
-import { BsTrash2 } from "react-icons/bs";
-import { FaSpinner } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import SearchProductModal from "./modals/SearchProductModal";
+import Header from "./Header";
+import CartItems from "./CartItems";
+import Summary from "./Summary";
+import StateIndicator from "@/components/StateIndicator";
+import InputPaymentModal from "./modals/InputPaymentModal";
+import ChangePaymentModal from "./modals/ChangePaymentModal";
 
 export default function CreateOrderPage() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [isModalAddOpen, setIsModalAddOpen] = useState(false);
     const [code, setCode] = useState("");
-    const [isLoadingScan, setIsLoadingScan] = useState(false);
+    const [codeAddProduct, setCodeAddProduct] = useState("");
+    const [amountPaid, setAmountPaid] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [isModalAddOpen, setIsModalAddOpen] = useState(false);
+    const [isModalSearchOpen, setIsModalSearchOpen] = useState(false);
+    const [isModalInputPaymentOpen, setIsModalInputPaymentOpen] = useState(false);
+    const [isModalChangePaymentOpen, setIsModalChangePaymentOpen] = useState(false);
 
     const { mutate: createOrder, isPending } = useAddOrder();
+
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const initialTotal = cartItems.reduce((total, item) => {
         return total + item.price * item.quantity;
@@ -34,27 +46,41 @@ export default function CreateOrderPage() {
         }))
     );
 
-    const handleSubmitPOS = () => {
+    const handleSubmitPOS = (amount: number) => {
+        if (amount < actualTotal) {
+            toast.error("Insufficient payment amount.");
+            return;
+        }
+
+        setIsModalInputPaymentOpen(false);
+        setIsLoading(true);
+
         const orderData = {
             items: cartItems.map((item) => ({
                 productId: item.id,
                 quantity: item.quantity,
             })),
+            amountPaid: amount,
         };
 
         createOrder(orderData, {
             onSuccess: () => {
-                setCartItems([]);
                 toast.success("Checkout success!");
+                setAmountPaid(amount);
+                setIsModalChangePaymentOpen(true);
             },
             onError: () => {
                 toast.error("Failed to checkout.");
+                inputRef.current?.focus();
+            },
+            onSettled: () => {
+                setIsLoading(false);
             },
         });
     };
 
     const handleScanProduct = async (code: string) => {
-        setIsLoadingScan(true);
+        setIsLoading(true);
         try {
             const res = await fetchProductByCode(code);
             const product = res?.data;
@@ -84,15 +110,17 @@ export default function CreateOrderPage() {
 
             toast.success(`${product.name} added to cart`);
         } catch (err: unknown) {
-            if (err instanceof AxiosError) {
-                setCode(code);
-                setIsModalAddOpen(true);
-                toast.error(err.response?.data?.message || err.message);
-            } else {
-                toast.error("Unexpected error occurred.");
+            if (err instanceof Error) {
+                if (err.message.includes("404")) {
+                    toast.error("Product Not Found");
+                    setCodeAddProduct(code);
+                    setIsModalAddOpen(true);
+                }
             }
+            console.log("Error scanning product:", err);
         } finally {
-            setIsLoadingScan(false);
+            setIsLoading(false);
+            inputRef.current?.focus();
         }
     };
 
@@ -120,122 +148,86 @@ export default function CreateOrderPage() {
         );
     };
 
+    const handleSelectProductFromModal = async (item: Product) => {
+        await handleScanProduct(item.code);
+        setIsModalSearchOpen(false);
+    };
+
+    const handleNextOrder = () => {
+        setCartItems([]);
+        setAmountPaid(0);
+        setIsModalChangePaymentOpen(false);
+        setIsModalInputPaymentOpen(false);
+        setCode("");
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }
+
+    const handleOnCloseInputPaymentModal = () => {
+        setIsModalInputPaymentOpen(false);
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    };
+
+    useEffect(() => {
+        if (isModalSearchOpen === false && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [code, isModalSearchOpen]);
+
+    useEffect(() => {
+        if (!isModalAddOpen && !isModalSearchOpen && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isModalAddOpen, isModalSearchOpen]);
+
     return (
         <>
-            {isLoadingScan && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20">
-                    <div className="flex flex-col items-center space-y-2">
-                        <FaSpinner className="animate-spin text-4xl text-blue-500" />
-                        <p className="text-sm text-gray-600">Scanning product...</p>
-                    </div>
-                </div>
+            <input
+                ref={inputRef}
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" && code.trim()) {
+                        handleScanProduct(code.trim());
+                        setCode("");
+                    }
+                }}
+                className="sr-only"
+                tabIndex={0}
+            />
+            {(isLoading || isPending) && (
+                <StateIndicator isLoading={isLoading} isOverlay />
             )}
             <div className="p-8 min-h-screen space-y-8">
                 {/* Header */}
-                <div className="mb-4">
-                    <h1 className="text-3xl font-bold text-gray-800">Create Order</h1>
-                    <p className="text-gray-600 text-sm">
-                        Scan or select product to add to order.
-                    </p>
-                </div>
+                <Header onClick={() => setIsModalSearchOpen(true)} />
 
-                {/* Product Selector */}
-                <div className="flex space-x-4 mb-6">
-                    {DUMMY_INPUT_PRODUCTS.map((product) => (
-                        <button
-                            key={product.id}
-                            onClick={() => handleScanProduct(product.id)}
-                            className="border border-blue-200 rounded-xl px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 shadow"
-                        >
-                            {product.id}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Wrapper Layout */}
+                {/* Main Content */}
                 <div className="flex flex-col md:flex-row gap-8">
 
                     {/* Left: Cart Items */}
-                    <div className="flex-1 bg-white rounded-2xl shadow-md border border-gray-200 p-6 space-y-4 min-h-[500px]">
-                        <h2 className="text-lg font-bold text-blue-700 flex items-center justify-between mx-2">
-                            Cart Items
-                            {cartItems.length > 0 && (
-                                <button
-                                    onClick={() => setCartItems([])}
-                                    className="flex items-center gap-1 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 px-3 py-1 rounded transition"
-                                >
-                                    <BsTrash2 className="w-4 h-4" />
-                                    Delete All
-                                </button>
-                            )}
-                        </h2>
-                        <hr className="border-gray-200" />
-                        <div className="space-y-4 h-[400px] overflow-y-auto pr-2">
-                            {cartItems.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full bg-gray-50 rounded-md border border-dashed border-gray-300 text-center p-4 italic">
-                                    <p className="text-gray-500 text-sm mb-2">No items in your cart yet.</p>
-                                    <p className="text-gray-500 text-sm">Scan a product or use the search to add items.</p>
-                                </div>
-                            ) : (
-                                cartItems.map((item) => (
-                                    <OrderItemCard
-                                        key={item.id}
-                                        item={item}
-                                        onDecrease={onDecrease}
-                                        onIncrease={onIncrease}
-                                        onDelete={onDelete}
-                                    />
-                                ))
-                            )}
-                        </div>
-                    </div>
+                    <CartItems
+                        cartItems={cartItems}
+                        setCartItems={setCartItems}
+                        onDecrease={onDecrease}
+                        onIncrease={onIncrease}
+                        onDelete={onDelete}
+                    />
 
                     {/* Right: Summary */}
-                    <div className="w-full md:max-w-[440px] bg-white rounded-2xl shadow-md border border-gray-200 p-6 flex flex-col justify-between min-h-[500px]">
-                        <div className="space-y-4">
-                            <h2 className="text-lg font-bold text-blue-700">Summary</h2>
-                            <hr className="border-gray-200" />
-
-                            <div className="text-sm text-gray-700 space-y-2 font-bold">
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Subtotal</span>
-                                    <div>
-                                        <span>Rp {initialTotal.toLocaleString("id-ID")}</span>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Delivery Fee</span>
-                                    <span>Rp 0</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Discount</span>
-                                    <span className={initialTotal && initialTotal > actualTotal && initialTotal != 0 ? "text-red-500" : ""}>{initialTotal && initialTotal > actualTotal && initialTotal != 0 ? `- Rp ${(initialTotal - actualTotal).toLocaleString("id-ID")}` : 'Rp 0'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Tax</span>
-                                    <span>Rp 0</span>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-between text-base text-gray-800 font-bold border-t border-gray-200 pt-3">
-                                <span>Total</span>
-                                <span>Rp {actualTotal.toLocaleString("id-ID")}</span>
-                            </div>
-                        </div>
-
-                        <div className="mt-6">
-                            <button
-                                className={`w-full py-3 rounded-lg font-semibold transition ${isPending || cartItems.length === 0
-                                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                        : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                    }`}
-                                onClick={handleSubmitPOS}
-                                disabled={isPending || cartItems.length === 0}
-                            >
-                                Submit Order (POS)
-                            </button>
-                        </div>
-                    </div>
+                    <Summary
+                        initialTotal={initialTotal}
+                        actualTotal={actualTotal}
+                        isPending={isPending}
+                        cartItems={cartItems}
+                        handleSubmitPOS={() => {
+                            setIsModalInputPaymentOpen(true);
+                        }}
+                    />
                 </div>
             </div>
 
@@ -243,21 +235,29 @@ export default function CreateOrderPage() {
                 isOpen={isModalAddOpen}
                 onClose={() => setIsModalAddOpen(false)}
                 onDirectAdd={handleScanProduct}
-                initialCode={code}
+                initialCode={codeAddProduct}
+            />
+
+            <SearchProductModal
+                isOpen={isModalSearchOpen}
+                onClose={() => setIsModalSearchOpen(false)}
+                onSelectProduct={handleSelectProductFromModal}
+            />
+
+            <InputPaymentModal
+                isOpen={isModalInputPaymentOpen}
+                onClose={handleOnCloseInputPaymentModal}
+                actualTotal={actualTotal}
+                onSubmit={handleSubmitPOS}
+            />
+
+            <ChangePaymentModal
+                isOpen={isModalChangePaymentOpen}
+                onAction={handleNextOrder}
+                total={actualTotal}
+                paid={amountPaid}
+                change={amountPaid - actualTotal}
             />
         </>
     );
 }
-
-const DUMMY_INPUT_PRODUCTS = [
-    { id: "1" },
-    { id: "2" },
-    { id: "3" },
-    { id: "4" },
-    { id: "5" },
-    { id: "6" },
-    { id: "7" },
-    { id: "8" },
-    { id: "9" },
-    { id: "10" },
-];

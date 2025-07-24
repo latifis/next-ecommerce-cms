@@ -3,4 +3,5 @@ export type CreateOrderInput = {
         productId: string;
         quantity: number;
     }[];
+    amountPaid: number;
 };
