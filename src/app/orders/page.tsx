@@ -15,6 +15,7 @@ import { OrderStatus } from "@/enum/orderStatus";
 import OrderFinalizationModal from "./modals/OrderFinalizationModal";
 import AwaitingPaymentModal from "./modals/AwaitingPaymentModal";
 import { PaymentMethod } from "@/enum/paymentMethod";
+import { OrderSource } from "@/enum/orderSource";
 
 export default function OrderPage() {
     const [search, setSearch] = useState("");
@@ -33,13 +34,14 @@ export default function OrderPage() {
     const [filterOrderStatus, setOrderStatusFilter] = useState<OrderStatus | null>(null);
     const [filterPaymentStatus, setPaymentStatusFilter] = useState<PaymentStatus | null>(null);
     const [filterPaymentMethod, setPaymentMethodFilter] = useState<PaymentMethod | null>(null);
+    const [filterOrderSource, setOrderSourceFilter] = useState<OrderSource | null>(null);
 
     const [orders, setOrders] = useState<Order[]>([]);
     const [totalItems, setTotalItems] = useState(0);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, sortField, sortOrder, pageSize, filterOrderStatus, filterPaymentStatus, filterPaymentMethod]);
+    }, [search, sortField, sortOrder, pageSize, filterOrderStatus, filterPaymentStatus, filterPaymentMethod, filterOrderSource]);
 
     const filters = {
         page: currentPage,
@@ -50,6 +52,7 @@ export default function OrderPage() {
         filterOrderStatus: filterOrderStatus,
         filterPaymentStatus: filterPaymentStatus,
         filterPaymentMethod: filterPaymentMethod,
+        filterOrderSource: filterOrderSource
     };
 
     const { data, isLoading, isError, refetch } = useOrders(filters);
@@ -105,9 +108,11 @@ export default function OrderPage() {
                     orderStatus={filterOrderStatus}
                     paymentStatus={filterPaymentStatus}
                     paymentMethod={filterPaymentMethod}
+                    orderSource={filterOrderSource}
                     setOrderStatus={setOrderStatusFilter}
                     setPaymentStatus={setPaymentStatusFilter}
                     setPaymentMethod={setPaymentMethodFilter}
+                    setOrderSource={setOrderSourceFilter}
                 />
 
                 {/* Order Table */}
@@ -134,7 +139,7 @@ export default function OrderPage() {
 
             <AwaitingPaymentModal
                 isOpen={isModalOpen && paymentStatus === PaymentStatus.UNPAID}
-                paymentId={orderIdToUpdate}
+                orderId={orderIdToUpdate}
                 onClose={handleOnClickClose}
             />
 
@@ -146,7 +151,7 @@ export default function OrderPage() {
             />
 
             <PreShippingCheckModal
-                isOpen={isModalOpen && paymentStatus === PaymentStatus.CONFIRMED}
+                isOpen={isModalOpen && paymentStatus === PaymentStatus.CONFIRMED && orderStatus === OrderStatus.PAID }
                 orderIdToUpdate={orderIdToUpdate}
                 onClose={handleOnClickClose}
                 onDone={refetch}

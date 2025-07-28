@@ -9,6 +9,8 @@ import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useBrands } from "@/satelite/services/brandService";
+import { createPortal } from "react-dom";
+import CloseButton from "@/components/ui/CloseButton";
 
 type UpdateProductModalProps = {
     productIdToUpdate: string | undefined;
@@ -23,6 +25,8 @@ export default function UpdateProductModal({
     onClose,
     onDone,
 }: UpdateProductModalProps) {
+    const [mounted, setMounted] = useState(false);
+
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState<number>(2500);
@@ -169,27 +173,25 @@ export default function UpdateProductModal({
         });
     };
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
     if (isError || isErrorGetCategories || isErrorBrand) return <ErrorComponent />
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6 md:p-8">
-            <div
-                className="bg-white w-full max-w-3xl p-6 sm:p-8 rounded-xl shadow-xl relative overflow-y-auto min-h-[200px] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] md:max-h-[calc(100vh-4rem)]"
-                style={{
-                    scrollbarWidth: "none",
-                    msOverflowStyle: "none",
-                }}
-            >
-                {/* Close Icon */}
-                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring focus:ring-gray-300">
-                    <FaTimes className="w-6 h-6" />
-                </button>
+    if (!mounted || !isOpen) return null;
 
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200"> Update Product</h2>
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
+            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
+                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
 
-                <div className="space-y-6 mt-8">
+                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
+                    Update Product
+                </h2>
+
+                <div className="space-y-6 mt-2 overflow-y-auto px-4">
                     {/* Product Name */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-bold text-gray-700">
@@ -520,6 +522,7 @@ export default function UpdateProductModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

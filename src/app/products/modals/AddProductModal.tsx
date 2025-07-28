@@ -10,6 +10,7 @@ import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useBrands } from "@/satelite/services/brandService";
 import { createPortal } from "react-dom";
+import CloseButton from "@/components/ui/CloseButton";
 
 type AddProductModalProps = {
     isOpen: boolean;
@@ -89,11 +90,11 @@ export default function AddProductModal({
         limit: 10000,
     };
 
-    const { mutate: addProduct, isPending } = useAddProduct();
+    const { mutate: addProduct, isPending, isError } = useAddProduct();
 
-    const { data: categoryData, isLoading, isError } = useCategories(filters);
+    const { data: categoryData, isPending: isPendingCategory, isError: isErrorCategory } = useCategories(filters);
 
-    const { data: brandData, isLoading: isLoadingBrand, isError: isErrorBrand } = useBrands(filters);
+    const { data: brandData, isPending: isPendingCategoryBrand, isError: isErrorCategoryBrand } = useBrands(filters);
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -186,27 +187,25 @@ export default function AddProductModal({
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
     if (!mounted || !isOpen) return null;
 
-    if (isError || isErrorBrand) return <ErrorComponent />
+    if (isError || isErrorCategory || isErrorCategoryBrand) return <ErrorComponent />;
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6 md:p-8">
-            <div
-                className="bg-white w-full max-w-3xl p-6 sm:p-8 rounded-xl shadow-xl relative overflow-y-auto min-h-[200px] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] md:max-h-[calc(100vh-4rem)]"
-                style={{
-                    scrollbarWidth: "none",
-                    msOverflowStyle: "none",
-                }}
-            >
-                {/* Close Icon */}
-                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring focus:ring-gray-300">
-                    <FaTimes className="w-6 h-6" />
-                </button>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
+            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
+                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
 
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200">Add Product</h2>
+                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
+                    Add Product
+                </h2>
 
-                <div className="space-y-6 mt-8">
+                <div className="space-y-6 mt-2 overflow-y-auto px-4">
                     {/* Product Name */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-bold text-gray-700">
@@ -221,7 +220,7 @@ export default function AddProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product name"
                             required
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         />
                     </div>
 
@@ -237,7 +236,7 @@ export default function AddProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product description"
                             rows={4}
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         ></textarea>
                     </div>
 
@@ -254,7 +253,7 @@ export default function AddProductModal({
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter product code"
                             required
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         />
                     </div>
 
@@ -273,7 +272,7 @@ export default function AddProductModal({
                             required
                             min="0"
                             onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         />
                     </div>
 
@@ -287,7 +286,7 @@ export default function AddProductModal({
                             value={unit}
                             onChange={(e) => setUnit(e.target.value)}
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         >
                             <option value="" disabled>Select unit</option>
                             {units.map((unitOption) => (
@@ -312,7 +311,7 @@ export default function AddProductModal({
                             placeholder="Enter product discount percentage"
                             min="0"
                             onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         />
                     </div>
 
@@ -330,7 +329,7 @@ export default function AddProductModal({
                             placeholder="Enter product min quantity for discount"
                             min="0"
                             onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         />
                     </div>
 
@@ -348,7 +347,7 @@ export default function AddProductModal({
                             placeholder="Enter product bulk discount price"
                             min="0"
                             onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         />
                     </div>
 
@@ -367,7 +366,7 @@ export default function AddProductModal({
                             required
                             min="0"
                             onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         />
                     </div>
 
@@ -380,7 +379,7 @@ export default function AddProductModal({
                             {/* Drag and Drop Area */}
                             <div
                                 onDrop={(e) => {
-                                    if (isLoading || isLoadingBrand) return;
+                                    if (isPendingCategory || isPendingCategoryBrand) return;
                                     e.preventDefault();
                                     const file = e.dataTransfer.files?.[0];
                                     if (file) {
@@ -392,16 +391,16 @@ export default function AddProductModal({
                                     }
                                 }}
                                 onDragOver={(e) => {
-                                    if (isLoading || isLoadingBrand) return;
+                                    if (isPendingCategory || isPendingCategoryBrand) return;
                                     e.preventDefault();
                                 }}
                                 onClick={() => {
-                                    if (isLoading || isLoadingBrand) return;
+                                    if (isPendingCategory || isPendingCategoryBrand) return;
                                     document.getElementById('file-input')?.click();
                                 }}
-                                aria-disabled={isLoading || isLoadingBrand}
+                                aria-disabled={isPendingCategory || isPendingCategoryBrand}
                                 className={`border-4 border-dashed border-gray-300 rounded-lg p-8 mb-4 flex items-center justify-center text-gray-500 transition-all duration-300 relative h-48
-                                    ${isLoading || isLoadingBrand ? "cursor-not-allowed pointer-events-none bg-gray-200" : "hover:border-blue-400 hover:bg-blue-50 cursor-pointer"}`}
+                                    ${isPendingCategory || isPendingCategoryBrand ? "cursor-not-allowed pointer-events-none bg-gray-200" : "hover:border-blue-400 hover:bg-blue-50 cursor-pointer"}`}
                             >
                                 {/* If image is uploaded, show the preview */}
                                 {imageFile ? (
@@ -458,7 +457,7 @@ export default function AddProductModal({
                                     }
                                 }}
                                 className="hidden"
-                                disabled={isLoading || isLoadingBrand}
+                                disabled={isPendingCategory || isPendingCategoryBrand}
                             />
                         </div>
                     </div>
@@ -474,7 +473,7 @@ export default function AddProductModal({
                             onChange={(e) => setCategoryId(e.target.value)}
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             required
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         >
                             <option value="" disabled>Select a category</option>
                             {categoryData?.data.data.map((category, index) => (
@@ -496,7 +495,7 @@ export default function AddProductModal({
                             onChange={(e) => setBrandId(e.target.value)}
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             required
-                            disabled={isLoading || isLoadingBrand}
+                            disabled={isPendingCategory || isPendingCategoryBrand}
                         >
                             <option value="" disabled>Select a brand</option>
                             {brandData?.data.data.map((brand, index) => (
@@ -513,7 +512,7 @@ export default function AddProductModal({
                     <button
                         onClick={handleSave}
                         className="px-5 py-3 rounded-lg text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
-                        disabled={isPending || isLoading || isLoadingBrand}
+                        disabled={isPending || isPendingCategory || isPendingCategoryBrand}
                     >
                         {isPending ? (
                             <>

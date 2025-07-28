@@ -7,8 +7,10 @@ import { decodeToken } from "@/utils/decodeToken";
 import Cookies from 'js-cookie';
 import { AxiosError } from "axios";
 import React, { useState, useEffect } from "react";
-import { FaSpinner, FaTimes } from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
+import CloseButton from "@/components/ui/CloseButton";
+import { createPortal } from "react-dom";
 
 type UpdateCategoryModalProps = {
     categoryIdToUpdate: string | undefined;
@@ -23,6 +25,8 @@ export default function UpdateCategoryModal({
     onClose,
     onDone,
 }: UpdateCategoryModalProps) {
+    const [mounted, setMounted] = useState(false);
+
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
@@ -83,25 +87,25 @@ export default function UpdateCategoryModal({
         });
     };
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
-    if (isError) return <ErrorComponent />
+    if (!mounted || !isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl relative">
+    if (isError) return <ErrorComponent />;
 
-                {/* Close Icon */}
-                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring focus:ring-gray-300">
-                    <FaTimes className="w-6 h-6" />
-                </button>
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
+            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
+                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
 
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200">
+                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
                     Update Category
                 </h2>
 
-                <div className="space-y-5 mt-6">
-
+                <div className="space-y-5 mt-2 overflow-y-auto px-4">
                     {/* Category Name */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-bold text-gray-700">
@@ -150,7 +154,7 @@ export default function UpdateCategoryModal({
                             "Update"
                         )}
                     </button>
-                    
+
                     <button
                         onClick={handleClose}
                         className="px-5 py-3 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 flex items-center justify-center"
@@ -159,6 +163,7 @@ export default function UpdateCategoryModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -5,9 +5,12 @@ import { Category } from "@/types/category/category";
 import { decodeToken } from "@/utils/decodeToken";
 import Cookies from 'js-cookie';
 import { AxiosError } from "axios";
-import React, { useState } from "react";
-import { FaSpinner, FaTimes } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
+import ErrorComponent from "@/components/Error";
+import { createPortal } from "react-dom";
+import CloseButton from "@/components/ui/CloseButton";
 
 type AddCategoryModalProps = {
     isOpen: boolean;
@@ -20,6 +23,8 @@ export default function AddCategoryModal({
     onClose,
     onDone,
 }: AddCategoryModalProps) {
+    const [mounted, setMounted] = useState(false);
+
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
@@ -35,7 +40,7 @@ export default function AddCategoryModal({
         setDescription("");
     }
 
-    const { mutate: addCategory, isPending } = useAddCategory();
+    const { mutate: addCategory, isPending, isError } = useAddCategory();
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,21 +75,25 @@ export default function AddCategoryModal({
         });;
     };
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl relative">
+    if (!mounted || !isOpen) return null;
 
-                {/* Close Icon */}
-                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring focus:ring-gray-300">
-                    <FaTimes className="w-6 h-6" />
-                </button>
+    if (isError) return <ErrorComponent />;
 
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200">Add Category</h2>
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
+            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
+                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
 
-                <div className="space-y-5 mt-6">
+                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
+                    Add Category
+                </h2>
 
+                <div className="space-y-5 mt-2 overflow-y-auto px-4">
                     {/* Category Name */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-bold text-gray-700">
@@ -140,6 +149,7 @@ export default function AddCategoryModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

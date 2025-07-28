@@ -9,7 +9,9 @@ export interface ItemsOrder {
         name: string,
         price: number,
         imageUrl: string,
-        imageUrlInput: string
+        minQuantityForDiscount: number,
+        discountPercentage: number,
+        bulkDiscountPrice: number
     }
     priceAtOrder: string,
     priceType: PriceType,

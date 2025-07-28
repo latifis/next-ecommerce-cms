@@ -4,6 +4,9 @@ import ErrorComponent from "@/components/Error";
 import { useCategoryById } from "@/satelite/services/categoryService";
 import { FaTimes } from "react-icons/fa";
 import { formatDateAndTime } from "@/utils/formatDateAndTime";
+import StateIndicator from "@/components/StateIndicator";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 type DetailCategoryModalProps = {
     categoryId: string | undefined;
@@ -16,11 +19,20 @@ export default function DetailCategoryModal({
     isOpen,
     onClose,
 }: DetailCategoryModalProps) {
-    const { data: category, isLoading, isError } = useCategoryById(categoryId);
+    const [mounted, setMounted] = useState(false);
+
+    const { data: category, isPending, isError } = useCategoryById(categoryId);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    if (!mounted || !isOpen) return null;
 
     if (isError) return <ErrorComponent />;
 
-    return (
+    return createPortal(
         <div
             className={`fixed inset-y-0 right-0 bg-white shadow-xl z-50 border-l border-gray-300 transform ${isOpen ? "translate-x-0" : "translate-x-full"
                 } transition-transform duration-300 w-full md:w-1/3`}
@@ -40,10 +52,12 @@ export default function DetailCategoryModal({
 
             {/* Content */}
             <div className="p-6 space-y-6 overflow-y-auto h-[calc(100%-72px)]">
-                {isLoading ? (
-                    <div className="flex justify-center items-center h-full">
-                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent border-t-4 rounded-full animate-spin"></div>
-                    </div>
+                {isPending ? (
+                    <StateIndicator
+                        isLoading={isPending}
+                        isError={isError}
+                        className="my-12"
+                    />
                 ) : (
                     <>
                         {/* Category Information */}
@@ -88,6 +102,7 @@ export default function DetailCategoryModal({
                     </>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

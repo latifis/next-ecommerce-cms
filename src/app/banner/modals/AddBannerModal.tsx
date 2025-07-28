@@ -1,11 +1,14 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAddBanner } from "@/satelite/services/bannerService";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import Image from "next/image";
+import ErrorComponent from "@/components/Error";
+import { createPortal } from "react-dom";
+import CloseButton from "@/components/ui/CloseButton";
 
 type AddBannerModalProps = {
     isOpen: boolean;
@@ -18,6 +21,8 @@ export default function AddBannerModal({
     onClose,
     onDone,
 }: AddBannerModalProps) {
+    const [mounted, setMounted] = useState(false);
+
     const [name, setName] = useState("");
     const [mediaType, setMediaType] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -37,7 +42,7 @@ export default function AddBannerModal({
         setSequence(0);
     }
 
-    const { mutate: addBanner, isPending } = useAddBanner();
+    const { mutate: addBanner, isPending, isError } = useAddBanner();
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,24 +80,25 @@ export default function AddBannerModal({
         })
     };
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6 md:p-8">
-            <div
-                className="bg-white w-full max-w-3xl p-6 sm:p-8 rounded-xl shadow-xl relative overflow-y-auto min-h-[200px] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] md:max-h-[calc(100vh-4rem)]"
-                style={{
-                    scrollbarWidth: "none",
-                    msOverflowStyle: "none",
-                }}
-            >
-                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring focus:ring-gray-300">
-                    <FaTimes className="w-6 h-6" />
-                </button>
+    if (!mounted || !isOpen) return null;
 
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200">Add Banner</h2>
+    if (isError) return <ErrorComponent />;
 
-                <div className="space-y-5 mt-6">
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
+            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
+                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
+
+                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
+                    Add Banner
+                </h2>
+
+                <div className="space-y-5 mt-2 overflow-y-auto px-4">
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                             Banner Name <span className="text-red-500">*</span>
@@ -129,6 +135,7 @@ export default function AddBannerModal({
                             onChange={(e) => setSequence(Number(e.target.value))}
                             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
                             placeholder="Enter banner sequence"
+                            onWheel={(e) => e.currentTarget.blur()}
                             required
                         />
                     </div>
@@ -231,32 +238,34 @@ export default function AddBannerModal({
                             />
                         </div>
                     </div>
-                    {/* Actions */}
-                    <div className="flex justify-end items-center mt-8 space-x-4">
-                        <button
-                            onClick={handleSave}
-                            className="px-5 py-2 rounded-lg text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
-                            disabled={isPending}
-                        >
-                            {isPending ? (
-                                <>
-                                    <FaSpinner className="animate-spin mr-2" />
-                                    Adding...
-                                </>
-                            ) : (
-                                "Add"
-                            )}
-                        </button>
+                </div>
 
-                        <button
-                            onClick={handleClose}
-                            className="px-5 py-3 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 flex items-center justify-center"
-                        >
-                            Cancel
-                        </button>
-                    </div>
+                {/* Actions */}
+                <div className="flex justify-end items-center mt-8 space-x-4">
+                    <button
+                        onClick={handleSave}
+                        className="px-5 py-2 rounded-lg text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
+                        disabled={isPending}
+                    >
+                        {isPending ? (
+                            <>
+                                <FaSpinner className="animate-spin mr-2" />
+                                Adding...
+                            </>
+                        ) : (
+                            "Add"
+                        )}
+                    </button>
+
+                    <button
+                        onClick={handleClose}
+                        className="px-5 py-3 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 flex items-center justify-center"
+                    >
+                        Cancel
+                    </button>
                 </div>
             </div>
-        </div >
+        </div>,
+        document.body
     )
 }

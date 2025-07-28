@@ -2,6 +2,7 @@
 
 import ErrorComponent from "@/components/Error";
 import RecentOrdersSkeleton from "@/components/skeletons/dashboard/RecentOrdersSkeleton";
+import { OrderStatus } from "@/enum/orderStatus";
 import { useOrders } from "@/satelite/services/orderService";
 import { formatDate } from "@/utils/formatDate";
 import { formatTime } from "@/utils/formatTime";
@@ -13,7 +14,8 @@ export default function RecentOrders() {
     const router = useRouter();
 
     const { data: order, isPending, isError } = useOrders({
-        sortField: "updatedAt"
+        sortField: "updatedAt",
+        limit: 5,
     });
 
     const handleClick = () => {
@@ -72,15 +74,25 @@ export default function RecentOrders() {
                             order?.data.data.map((order, index) => (
                                 <tr
                                     key={order.id}
-                                    className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-t`}
+                                    className={`
+                                        hover:bg-blue-50 
+                                        ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} 
+                                        border-t
+                                        ${order.orderStatus === OrderStatus.COMPLETED
+                                            ? "text-gray-400 italic"
+                                            : order.orderStatus === OrderStatus.CANCELLED
+                                                ? "text-red-400 line-through italic"
+                                                : "text-gray-800"
+                                        }
+                                    `}
                                 >
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                    <td className="px-6 py-4 text-sm font-medium">
                                         {order.orderId || "N/A"}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                    <td className="px-6 py-4 text-sm">
                                         {order.user?.name || "N/A"}
                                     </td>
-                                    <td className="px-6 py-4 text-gray-700">
+                                    <td className="px-6 py-4">
                                         <div className="flex items-center space-x-2">
                                             <span className="font-semibold text-sm">{order.orderStatus || "N/A"}</span>
                                             <span className="text-gray-500 text-xs">
@@ -90,21 +102,21 @@ export default function RecentOrders() {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                    <td className="px-6 py-4 text-sm">
                                         <div className="flex flex-col text-left">
                                             <span>
                                                 {order.updatedAt
                                                     ? formatDate(order.updatedAt)
                                                     : formatDate(order.createdAt)}
                                             </span>
-                                            <span className="text-xs text-gray-400">
+                                            <span className="text-xs">
                                                 {order.updatedAt
                                                     ? formatTime(order.updatedAt)
                                                     : formatTime(order.createdAt)}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-700 text-right">
+                                    <td className="px-6 py-4 text-sm text-right">
                                         {order.totalPrice ? parseInt(order.totalPrice).toLocaleString('id-ID') : "N/A"}
                                     </td>
                                 </tr>

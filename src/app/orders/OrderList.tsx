@@ -104,18 +104,28 @@ export default function OrderList({
                         paginatedOrders.map((order, index) => (
                             <tr
                                 key={order.id}
-                                className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-t`}
+                                className={`
+                                    hover:bg-blue-50 
+                                    ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} 
+                                    border-t
+                                    ${order.orderStatus === OrderStatus.COMPLETED
+                                        ? "text-gray-400 italic"
+                                        : order.orderStatus === OrderStatus.CANCELLED
+                                            ? "text-red-400 line-through italic"
+                                            : "text-gray-800"
+                                    }
+                                `}
                             >
-                                <td className="px-6 py-4 text-sm text-gray-800">
+                                <td className={`px-6 py-4 text-sm`}>
                                     {(currentPage - 1) * pageSize + index + 1}
                                 </td>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                <td className={`px-6 py-4 text-sm font-medium`}>
                                     {order.orderId || "N/A"}
                                 </td>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                <td className={`px-6 py-4 text-sm font-medium`}>
                                     {order.user?.name || "N/A"}
                                 </td>
-                                <td className="px-6 py-4 text-gray-700">
+                                <td className={`px-6 py-4 text-sm font-medium`}>
                                     <div className="flex items-center space-x-2">
                                         <span className="font-semibold text-sm">{order.orderStatus || "N/A"}</span>
                                         <span className="text-gray-500 text-xs">
@@ -125,10 +135,10 @@ export default function OrderList({
                                         </span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-700">
+                                <td className={`px-6 py-4 text-sm font-medium`}>
                                     {order.totalPrice ? parseInt(order.totalPrice).toLocaleString('id-ID') : "N/A"}
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-700">
+                                <td className={`px-6 py-4 text-sm font-medium`}>
                                     <div className="flex flex-col text-left">
                                         <span>
                                             {order.updatedAt
@@ -153,10 +163,10 @@ export default function OrderList({
                                 <td className="px-6 py-4 text-right">
                                     <button
                                         onClick={() => onUpdate(order.id, order.paymentStatus as PaymentStatus, order.orderStatus as OrderStatus)}
-                                        className={`px-3 py-2 rounded mx-2 ${order.orderStatus === OrderStatus.COMPLETED
+                                        className={`px-3 py-2 rounded mx-2 ${order.orderStatus === OrderStatus.COMPLETED || order.orderStatus === OrderStatus.CANCELLED
                                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                                             : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"}`}
-                                        disabled={order.orderStatus === OrderStatus.COMPLETED}
+                                        disabled={order.orderStatus === OrderStatus.COMPLETED || order.orderStatus === OrderStatus.CANCELLED}
                                     >
                                         <FaEdit />
                                     </button>

@@ -22,7 +22,7 @@ export default function SearchProductModal({
     onSelectProduct,
 }: Props) {
     const [search, setSearch] = useState("");
-    
+
     const debouncedSearch = useDebounce(search, 500);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -118,7 +118,7 @@ export default function SearchProductModal({
                         <DataNotFound
                             title="Your cart is still empty"
                             description="Let’s explore some awesome products and add them to your cart!"
-                            className="max-w-md w-full mx-auto flex flex-col items-center justify-center text-center gap-4 p-6 overflow-hidden"
+                            className="max-w-md w-full mx-auto flex flex-col items-center justify-center text-center gap-4 p-6"
                         />
                     ) : (
                         <>

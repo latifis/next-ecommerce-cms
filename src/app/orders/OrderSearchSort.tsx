@@ -6,6 +6,7 @@ import { ORDER_SORT_FIELDS, SORT_ORDER_ASC, SORT_ORDER_DESC } from "@/lib/consta
 import { PaymentMethod } from "@/enum/paymentMethod";
 import { PaymentStatus } from "@/enum/paymentStatus";
 import { OrderStatus } from "@/enum/orderStatus";
+import { OrderSource } from "@/enum/orderSource";
 
 type OrderSearchSortProps = {
     search: string;
@@ -18,9 +19,11 @@ type OrderSearchSortProps = {
     orderStatus: OrderStatus | null
     paymentStatus: PaymentStatus | null;
     paymentMethod: PaymentMethod | null;
+    orderSource: OrderSource | null;
     setOrderStatus: React.Dispatch<React.SetStateAction<OrderStatus | null>>;
     setPaymentStatus: React.Dispatch<React.SetStateAction<PaymentStatus | null>>;
     setPaymentMethod: React.Dispatch<React.SetStateAction<PaymentMethod | null>>;
+    setOrderSource: React.Dispatch<React.SetStateAction<OrderSource | null>>;
 };
 
 export default function OrderSearchSort({
@@ -34,9 +37,11 @@ export default function OrderSearchSort({
     orderStatus,
     paymentStatus,
     paymentMethod,
+    orderSource,
     setOrderStatus,
     setPaymentStatus,
     setPaymentMethod,
+    setOrderSource
 }: OrderSearchSortProps) {
     const toggleSortOrder = (field: keyof Order) => {
         if (sortField === field) {
@@ -84,11 +89,24 @@ export default function OrderSearchSort({
                     <span className="text-gray-600 font-medium">Filters:</span>
                     <div className="flex gap-2">
                         <select
+                            onChange={(e) => setOrderSource(e.target.value as null | OrderSource)}
+                            value={orderSource || ""}
+                            className="px-2 py-1 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                            <option value="">All Order Source</option>
+                            {Object.keys(OrderSource).map((source) => (
+                                <option key={source} value={source}>
+                                    {source.charAt(0).toUpperCase() + source.slice(1).toLowerCase()}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
                             onChange={(e) => setOrderStatus(e.target.value as null | OrderStatus)}
                             value={orderStatus || ""}
                             className="px-2 py-1 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         >
-                            <option value="">Order Status</option>
+                            <option value="">All Order Status</option>
                             {Object.keys(OrderStatus).map((status) => (
                                 <option key={status} value={status}>
                                     {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
@@ -101,7 +119,7 @@ export default function OrderSearchSort({
                             value={paymentStatus || ""}
                             className="px-2 py-1 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         >
-                            <option value="">Payment Status</option>
+                            <option value="">All Payment Status</option>
                             {Object.keys(PaymentStatus).map((status) => (
                                 <option key={status} value={status}>
                                     {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
@@ -114,7 +132,7 @@ export default function OrderSearchSort({
                             value={paymentMethod || ""}
                             className="px-2 py-1 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         >
-                            <option value="">Payment Method</option>
+                            <option value="">All Payment Method</option>
                             {Object.keys(PaymentMethod).map((method) => (
                                 <option key={method} value={method}>
                                     {method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()}
@@ -132,7 +150,7 @@ export default function OrderSearchSort({
                     onChange={handlePageSizeChange}
                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                    {[5, 10, 15, 20].map((size) => (
+                    {[5, 10, 15, 20, 50, 100].map((size) => (
                         <option key={size} value={size}>
                             {size} items
                         </option>

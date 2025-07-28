@@ -7,9 +7,13 @@ import { formatDateAndTime } from "@/utils/formatDateAndTime";
 import OrderFlow from "@/components/OrderFlow";
 import { PaymentStatus } from "@/enum/paymentStatus";
 import { OrderStatus } from "@/enum/orderStatus";
-import Image from "next/image";
 import { DEFAULT_IMAGE_URL } from "@/lib/constant";
 import { formatCurrency } from "@/utils/formatCurrency";
+import PopupImage from "@/components/ui/PopupImage";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import StateIndicator from "@/components/StateIndicator";
+import OrderItemView from "@/components/card/OrderItemView";
 
 type DetailOrderModalProps = {
     orderId: string | undefined;
@@ -22,22 +26,38 @@ export default function DetailOrderModal({
     isOpen,
     onClose,
 }: DetailOrderModalProps) {
-    const { data: order, isLoading, isError } = useOrderById(orderId);
+    const [mounted, setMounted] = useState(false);
 
-    if (isError) return <ErrorComponent />;
+    const [isPopupVisible, setPopupVisible] = useState(false);
 
-    return (
+    const { data: order, isPending, isError } = useOrderById(orderId);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    const handleClose = () => {
+        onClose(false);
+        setPopupVisible(false);
+    }
+
+    if (!mounted || !isOpen) return null;
+
+    if (isError) return <ErrorComponent />
+
+    return createPortal(
         <div
             className={`fixed inset-y-0 right-0 bg-white shadow-xl z-50 border-l border-gray-300 transform ${isOpen ? "translate-x-0" : "translate-x-full"
                 } transition-transform duration-300 w-full md:w-2/5`}
-            onMouseLeave={() => onClose(false)}
+            onMouseLeave={handleClose}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-gray-100 border-b border-gray-300">
                 <h2 className="text-lg font-bold text-gray-700">Order Details</h2>
                 <button
                     className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-full transition"
-                    onClick={() => onClose(false)}
+                    onClick={handleClose}
                     aria-label="Close Modal"
                 >
                     <FaTimes className="text-lg" />
@@ -46,10 +66,11 @@ export default function DetailOrderModal({
 
             {/* Content */}
             <div className="p-6 space-y-6 overflow-y-auto h-[calc(100%-72px)]">
-                {isLoading ? (
-                    <div className="flex justify-center items-center h-full">
-                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent border-t-4 rounded-full animate-spin"></div>
-                    </div>
+                {isPending ? (
+                    <StateIndicator
+                        isLoading={isPending}
+                        isError={isError}
+                    />
                 ) : (
                     <>
                         <OrderFlow
@@ -127,45 +148,10 @@ export default function DetailOrderModal({
                                 <h2 className="text-xl font-semibold text-gray-800">Items</h2>
                             </header>
                             {order?.data.items ? (
-                                <>
-                                    {order.data.items.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="flex items-center justify-between py-1 px-4 border-b border-gray-200 bg-white rounded-lg hover:shadow transition-shadow"
-                                        >
-                                            {/* Image */}
-                                            <div className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border border-gray-200">
-                                                <Image
-                                                    src={item.product.imageUrl || DEFAULT_IMAGE_URL}
-                                                    alt={item.product.name || "Product Image"}
-                                                    width={56}
-                                                    height={56}
-                                                    className="object-cover"
-                                                />
-                                            </div>
-
-                                            {/* Details */}
-                                            <div className="flex-1 ml-3">
-                                                <h3 className="text-sm font-medium text-gray-800 truncate hover:text-blue-600 transition-colors">
-                                                    {item.product?.name ?? "Unnamed Product"}
-                                                </h3>
-                                                <div className="text-sm text-gray-500 mt-1">
-                                                    {item.quantity} x{" "}
-                                                    <span className="text-gray-700 font-medium">
-                                                        {formatCurrency(item.product?.price) ?? "N/A"}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Subtotal */}
-                                            <div className="text-right">
-                                                <span className="text-sm font-semibold text-gray-900">
-                                                    {formatCurrency(parseInt(item.subtotal))}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </>
+                                <OrderItemView
+                                    orderItems={order.data.items}
+                                    showLess={true}
+                                />
                             ) : (
                                 <p className="text-gray-600 w-full max-w-4xl mx-auto">No items found for this order.</p>
                             )}
@@ -185,15 +171,22 @@ export default function DetailOrderModal({
                                     <div className="flex justify-between">
                                         <span className="font-medium text-gray-800">Payment Proof:</span>
                                         {order.data.payment.paymentProof ? (
-                                            <a
-                                                href={order.data.payment.paymentProof}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-500 underline"
+                                            <button
+                                                onClick={() => setPopupVisible(true)}
+                                                className="ml-2 text-blue-600 underline hover:text-blue-800 hover:underline cursor-pointer font-semibold transition-colors"
+                                                type="button"
                                             >
                                                 View Proof
-                                            </a>
+                                            </button>
                                         ) : "N/A"}
+                                        <PopupImage
+                                            visible={isPopupVisible}
+                                            onClose={() => setPopupVisible(false)}
+                                            imageUrl={order.data.payment.paymentProof || DEFAULT_IMAGE_URL}
+                                            alt="Payment Proof"
+                                            width={600}
+                                            height={600}
+                                        />
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="font-medium text-gray-800">Transaction ID:</span>
@@ -256,6 +249,7 @@ export default function DetailOrderModal({
                     </>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

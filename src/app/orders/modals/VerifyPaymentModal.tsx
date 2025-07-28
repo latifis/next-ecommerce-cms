@@ -2,8 +2,8 @@
 
 import ErrorComponent from "@/components/Error";
 import { useOrderById, useVerifyPayment } from "@/satelite/services/orderService";
-import React, { useState } from "react";
-import { FaSpinner, FaTimes } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { PaymentStatus } from "@/enum/paymentStatus";
@@ -12,6 +12,10 @@ import { Payment } from "@/types/order/payment";
 import { DEFAULT_IMAGE_URL } from "@/lib/constant";
 import OrderFlow from "@/components/OrderFlow";
 import AgreementCheckbox from "@/components/AgreementCheckbox";
+import CloseButton from "@/components/ui/CloseButton";
+import { createPortal } from "react-dom";
+import StateIndicator from "@/components/StateIndicator";
+import PopupImage from "@/components/ui/PopupImage";
 
 type VerifyPaymentModalProps = {
     paymentId: string | undefined;
@@ -26,6 +30,7 @@ export default function VerifyPaymentModal({
     onClose,
     onDone
 }: VerifyPaymentModalProps) {
+    const [mounted, setMounted] = useState(false);
 
     const [isPopupVisible, setPopupVisible] = useState(false);
     const [statusAgreement, setStatusAgreement] = useState(false);
@@ -35,9 +40,9 @@ export default function VerifyPaymentModal({
         setStatusAgreement(false);
     };
 
-    const { mutate: updatePayment, isPending } = useVerifyPayment();
+    const { mutate: updatePayment, isPending: isPendingVerify } = useVerifyPayment();
 
-    const { data: order, isLoading, isError } = useOrderById(paymentId);
+    const { data: order, isPending, isError } = useOrderById(paymentId);
 
     const handleVerifyPayment = (e: React.FormEvent) => {
         e.preventDefault();
@@ -72,32 +77,37 @@ export default function VerifyPaymentModal({
         });
     };
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    if (!mounted || !isOpen) return null;
 
     if (isError) return <ErrorComponent />
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div
-                className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 rounded-xl shadow-xl relative hide-scrollbar"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
+            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
+                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
 
-                {/* Close Icon */}
-                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring focus:ring-gray-300">
-                    <FaTimes className="w-6 h-6" />
-                </button>
+                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
+                    Verify Payment
+                </h2>
+
+                {(isPendingVerify) && (
+                    <StateIndicator isLoading={isPendingVerify} isOverlay />
+                )}
 
                 {/* Payment Information */}
-                {isLoading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <FaSpinner className="animate-spin text-blue-500 text-4xl" />
-                    </div>
+                {isPending ? (
+                    <StateIndicator
+                        isLoading={isPending}
+                        isError={isError}
+                        className="my-12"
+                    />
                 ) : !order?.data.payment ? (
                     <>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200">
-                            No Payment Information
-                        </h2>
                         <OrderFlow currentStep={0} />
                         <div className="flex justify-center items-center h-64">
                             <p className="text-gray-600">No payment information found.</p>
@@ -105,97 +115,82 @@ export default function VerifyPaymentModal({
                     </>
                 ) : (
                     <>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200">
-                            Verify Payment
-                        </h2>
-                        <OrderFlow currentStep={1} />
-                        {order?.data.payment && (
-                            <div className="mt-8 space-y-6 mx-6">
-                                <header>
-                                    <h2 className="text-xl font-semibold text-gray-800">Payment Information</h2>
-                                </header>
-                                <div className="grid gap-4 text-sm text-gray-600">
-                                    <div className="flex justify-between">
-                                        <span className="font-medium text-gray-800">Payment Method:</span>
-                                        <span>{order.data.order.paymentMethod || "Unknown"}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="font-medium text-gray-800">Total Price:</span>
-                                        <span>
-                                            {order.data.order.totalPrice
-                                                ? parseInt(order.data.order.totalPrice).toLocaleString('id-ID')
-                                                : "N/A"}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="font-medium text-gray-800">Payment Status:</span>
-                                        <span>{order.data.payment.paymentStatus || "Unknown"}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <div className="flex flex-col gap-2">
-                                            <span className="font-medium text-gray-800">Payment Proof:</span>
+                        <div className="overflow-y-auto">
+                            <OrderFlow currentStep={1} />
+                            {order?.data.payment && (
+                                <div className="mt-8 space-y-6 mx-6">
+                                    <header>
+                                        <h2 className="text-xl font-semibold text-gray-800">Payment Information</h2>
+                                    </header>
+                                    <div className="grid gap-4 text-sm text-gray-600">
+                                        <div className="flex justify-between">
+                                            <span className="font-medium text-gray-800">Payment Method:</span>
+                                            <span>{order.data.order.paymentMethod || "Unknown"}</span>
                                         </div>
-                                        <div className="relative">
-                                            {/* Small Image */}
-                                            <Image
-                                                src={DEFAULT_IMAGE_URL || order.data.payment.paymentProof}
-                                                alt="Payment Proof"
-                                                width={300}
-                                                height={300}
-                                                className="object-contain"
-                                            />
-                                            {/* View Larger Image Button */}
-                                            <button
-                                                className="absolute top-2 right-2 text-sm px-3 py-1 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 hover:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-300"
-                                                onClick={() => setPopupVisible(true)}
-                                            >
-                                                Full Image
-                                            </button>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium text-gray-800">Total Price:</span>
+                                            <span>
+                                                {order.data.order.totalPrice
+                                                    ? parseInt(order.data.order.totalPrice).toLocaleString('id-ID')
+                                                    : "N/A"}
+                                            </span>
                                         </div>
-                                        {/* Pop-up for Larger Image */}
-                                        {isPopupVisible && (
-                                            <div
-                                                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50"
-                                                onClick={() => setPopupVisible(false)}
-                                            >
-                                                <div
-                                                    className="relative w-[600px] h-[600px] bg-white p-2 border border-gray-300 shadow-lg"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <Image
-                                                        src={DEFAULT_IMAGE_URL || order.data.payment.paymentProof}
-                                                        alt="Payment Proof"
-                                                        layout="fill"
-                                                        objectFit="contain"
-                                                    />
-                                                    <button
-                                                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 transition-colors"
-                                                        onClick={() => setPopupVisible(false)}
-                                                    >
-                                                        <FaTimes className="w-6 h-6" />
-                                                    </button>
-                                                </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium text-gray-800">Payment Status:</span>
+                                            <span>{order.data.payment.paymentStatus || "Unknown"}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <div className="flex flex-col gap-2">
+                                                <span className="font-medium text-gray-800">Payment Proof:</span>
                                             </div>
-                                        )}
+                                            <div className="relative">
+                                                {/* Small Image */}
+                                                <Image
+                                                    src={order.data.payment.paymentProof || DEFAULT_IMAGE_URL}
+                                                    alt="Payment Proof"
+                                                    width={300}
+                                                    height={300}
+                                                    className="object-contain max-h-40"
+                                                />
+                                                {/* View Larger Image Button */}
+                                                <button
+                                                    className="absolute top-2 right-2 text-sm px-3 py-1 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 hover:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-300"
+                                                    onClick={() => setPopupVisible(true)}
+                                                >
+                                                    Full Image
+                                                </button>
+                                            </div>
+                                            {/* Pop-up for Larger Image */}
+                                            {isPopupVisible && (
+                                                <PopupImage
+                                                    visible={isPopupVisible}
+                                                    onClose={() => setPopupVisible(false)}
+                                                    imageUrl={order.data.payment.paymentProof || DEFAULT_IMAGE_URL}
+                                                    alt="Payment Proof"
+                                                    width={600}
+                                                    height={600}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Agreement Checkbox */}
-                        <AgreementCheckbox
-                            status={statusAgreement}
-                            onStatusChange={setStatusAgreement}
-                        />
+                            {/* Agreement Checkbox */}
+                            <AgreementCheckbox
+                                status={statusAgreement}
+                                onStatusChange={setStatusAgreement}
+                            />
+                        </div>
 
                         {/* Actions */}
                         <div className="flex justify-end items-center mt-8 space-x-4 mx-4">
                             <button
                                 onClick={handleVerifyPayment}
                                 className="w-full px-5 py-3 rounded-lg text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
-                                disabled={isPending || isLoading}
+                                disabled={isPendingVerify || isPending}
                             >
-                                {isPending ? (
+                                {isPendingVerify ? (
                                     <>
                                         <FaSpinner className="animate-spin mr-2" />
                                         Verifying...
@@ -208,6 +203,7 @@ export default function VerifyPaymentModal({
                     </>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
