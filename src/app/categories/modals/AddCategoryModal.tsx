@@ -2,15 +2,14 @@
 
 import { useAddCategory } from "@/satelite/services/categoryService";
 import { Category } from "@/types/category/category";
-import { decodeToken } from "@/utils/decodeToken";
-import Cookies from 'js-cookie';
 import { AxiosError } from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
-import ErrorComponent from "@/components/Error";
-import { createPortal } from "react-dom";
-import CloseButton from "@/components/ui/CloseButton";
+import ErrorComponent from "@/components/ui/feedback/Error";
+import FormField from "@/components/ui/forms/FormField";
+import Button from "@/components/ui/button/Button";
+import ModalBox from "@/components/ui/modal/ModalBox";
 
 type AddCategoryModalProps = {
     isOpen: boolean;
@@ -23,12 +22,10 @@ export default function AddCategoryModal({
     onClose,
     onDone,
 }: AddCategoryModalProps) {
-    const [mounted, setMounted] = useState(false);
-
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
-    const decodedToken = decodeToken(Cookies.get("token"))
+    const { mutate: addCategory, isPending, isError } = useAddCategory();
 
     const handleClose = () => {
         resetValue()
@@ -39,8 +36,6 @@ export default function AddCategoryModal({
         setName("");
         setDescription("");
     }
-
-    const { mutate: addCategory, isPending, isError } = useAddCategory();
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,7 +48,6 @@ export default function AddCategoryModal({
         const newCategory: Category = {
             name: name,
             description: description,
-            createdBy: decodedToken?.email
         };
 
         addCategory(newCategory, {
@@ -75,81 +69,52 @@ export default function AddCategoryModal({
         });;
     };
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
-
-    if (!mounted || !isOpen) return null;
+    if (!isOpen) return null;
 
     if (isError) return <ErrorComponent />;
 
-    return createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
-                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
+    return (
+        <ModalBox isOpen={isOpen} onClose={handleClose}>
+            <ModalBox.Header>
+                <h2>Add Category</h2>
+            </ModalBox.Header>
+            <ModalBox.Body>
+                <FormField
+                    label="Name"
+                    id="name"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Enter category name"
+                    required
+                />
+                <FormField
+                    label="Description"
+                    id="description"
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    placeholder="Enter category description"
+                    rows={4}
+                    type="textarea"
+                />
+            </ModalBox.Body>
+            <ModalBox.Footer>
+                <Button
+                    onClick={handleSave}
+                    loading={isPending}
+                    disabled={isPending}
+                    variant="primary"
+                    icon={!isPending ? undefined : <FaSpinner className="animate-spin" />}
+                >
+                    {isPending ? "Adding" : "Add"}
+                </Button>
 
-                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
-                    Add Category
-                </h2>
-
-                <div className="space-y-5 mt-2 overflow-y-auto px-4">
-                    {/* Category Name */}
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-bold text-gray-700">
-                            Category Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            placeholder="Enter category name"
-                            required
-                        />
-                    </div>
-
-                    {/* Category Description */}
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-bold text-gray-700">Category Description</label>
-                        <textarea
-                            id="description"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            placeholder="Enter category description"
-                            rows={4}
-                        ></textarea>
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex justify-end items-center mt-8 space-x-4">
-                    <button
-                        onClick={handleSave}
-                        className="px-5 py-2 rounded-lg text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
-                        disabled={isPending}
-                    >
-                        {isPending ? (
-                            <>
-                                <FaSpinner className="animate-spin mr-2" />
-                                Adding...
-                            </>
-                        ) : (
-                            "Add"
-                        )}
-                    </button>
-
-                    <button
-                        onClick={handleClose}
-                        className="px-5 py-3 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 flex items-center justify-center"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>,
-        document.body
+                <Button
+                    onClick={handleClose}
+                    variant="secondary"
+                >
+                    Cancel
+                </Button>
+            </ModalBox.Footer>
+        </ModalBox>
     );
 }

@@ -5,9 +5,9 @@ import React, { useRef, useCallback, useEffect, useState } from "react";
 import { Product } from "@/types/product/product";
 import { useDebounce } from "@/satelite/hook/useDebounce";
 import { useAllProducts } from "@/satelite/services/productService";
-import CloseButton from "@/components/ui/CloseButton";
-import { DataNotFound } from "@/components/DataNotFound";
-import StateIndicator from "@/components/StateIndicator";
+import CloseButton from "@/components/ui/button/CloseButton";
+import { DataNotFound } from "@/components/ui/feedback/DataNotFound";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import ProductItemCard from "@/components/card/ProductItemCard";
 
 type Props = {

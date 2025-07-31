@@ -1,16 +1,16 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useCategoryById, useUpdateCategory } from "@/satelite/services/categoryService";
 import { Category } from "@/types/category/category";
-import { decodeToken } from "@/utils/decodeToken";
-import Cookies from 'js-cookie';
 import { AxiosError } from "axios";
 import React, { useState, useEffect } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
-import CloseButton from "@/components/ui/CloseButton";
-import { createPortal } from "react-dom";
+import FormField from "@/components/ui/forms/FormField";
+import Button from "@/components/ui/button/Button";
+import FormCategorySkeleton from "@/components/skeletons/inputForm/formCategorySkeleton";
+import ModalBox from "@/components/ui/modal/ModalBox";
 
 type UpdateCategoryModalProps = {
     categoryIdToUpdate: string | undefined;
@@ -25,26 +25,11 @@ export default function UpdateCategoryModal({
     onClose,
     onDone,
 }: UpdateCategoryModalProps) {
-    const [mounted, setMounted] = useState(false);
-
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
-    const handleClose = () => {
-        resetValue();
-        onClose(false);
-    };
-
-    const resetValue = () => {
-        setName("");
-        setDescription("");
-    }
-
-    const decodedToken = decodeToken(Cookies.get("token"))
-
-    const { mutate: updateCategory, isPending } = useUpdateCategory();
-
-    const { data: category, isLoading, isError } = useCategoryById(categoryIdToUpdate);
+    const { mutate: updateCategory, isPending: isPendingUpdate } = useUpdateCategory();
+    const { data: category, isPending, isError } = useCategoryById(categoryIdToUpdate);
 
     useEffect(() => {
         if (isOpen && category) {
@@ -52,6 +37,16 @@ export default function UpdateCategoryModal({
             setDescription(category.data.description || "");
         }
     }, [isOpen, category]);
+
+    const resetValue = () => {
+        setName("");
+        setDescription("");
+    };
+
+    const handleClose = () => {
+        resetValue();
+        onClose(false);
+    };
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,9 +58,8 @@ export default function UpdateCategoryModal({
 
         const updatedCategory: Category = {
             id: categoryIdToUpdate,
-            name: name,
-            description: description,
-            updatedBy: decodedToken?.email
+            name,
+            description,
         };
 
         updateCategory(updatedCategory, {
@@ -87,83 +81,64 @@ export default function UpdateCategoryModal({
         });
     };
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
-
-    if (!mounted || !isOpen) return null;
+    if (!isOpen) return null;
 
     if (isError) return <ErrorComponent />;
 
-    return createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
-                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
+    return (
+        <ModalBox isOpen={isOpen} onClose={handleClose}>
+            <ModalBox.Header>
+                <h2>Update Category</h2>
+            </ModalBox.Header>
 
-                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
-                    Update Category
-                </h2>
-
-                <div className="space-y-5 mt-2 overflow-y-auto px-4">
-                    {/* Category Name */}
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-bold text-gray-700">
-                            Category Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
+            <ModalBox.Body>
+                {isPending ? (
+                    <FormCategorySkeleton />
+                ) : (
+                    <>
+                        <FormField
+                            label="Name"
                             id="name"
+                            type="text"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            onChange={e => setName(e.target.value)}
                             placeholder="Enter category name"
+                            disabled={isPending || isPendingUpdate}
                             required
-                            disabled={isLoading}
                         />
-                    </div>
 
-                    {/* Category Description */}
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-bold text-gray-700">Category Description</label>
-                        <textarea
+                        <FormField
+                            label="Description"
                             id="description"
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            onChange={e => setDescription(e.target.value)}
                             placeholder="Enter category description"
                             rows={4}
-                            disabled={isLoading}
-                        ></textarea>
-                    </div>
-                </div>
+                            type="textarea"
+                            disabled={isPending || isPendingUpdate}
+                        />
+                    </>
+                )}
+            </ModalBox.Body>
 
-                {/* Actions */}
-                <div className="flex justify-end items-center mt-8 space-x-4">
-                    <button
-                        onClick={handleSave}
-                        className="px-5 py-2 rounded-lg text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
-                        disabled={isPending || isLoading}
-                    >
-                        {isPending ? (
-                            <>
-                                <FaSpinner className="animate-spin mr-2" />
-                                Saving...
-                            </>
-                        ) : (
-                            "Update"
-                        )}
-                    </button>
+            <ModalBox.Footer>
+                <Button
+                    onClick={handleSave}
+                    loading={isPendingUpdate}
+                    disabled={isPendingUpdate || isPending}
+                    variant="primary"
+                    icon={isPendingUpdate ? <FaSpinner className="animate-spin" /> : undefined}
+                >
+                    {isPendingUpdate ? "Updating" : "Update"}
+                </Button>
 
-                    <button
-                        onClick={handleClose}
-                        className="px-5 py-3 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 flex items-center justify-center"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>,
-        document.body
+                <Button
+                    onClick={handleClose}
+                    variant="secondary"
+                >
+                    Cancel
+                </Button>
+            </ModalBox.Footer>
+        </ModalBox>
     );
 }

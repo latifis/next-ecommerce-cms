@@ -1,6 +1,6 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useUserById, useUpdateUser } from "@/satelite/services/userService";
 import { User } from "@/types/user/user";
 import { AxiosError } from "axios";
@@ -8,8 +8,10 @@ import React, { useState, useEffect } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { UserRole } from "@/enum/userRole";
-import CloseButton from "@/components/ui/CloseButton";
-import { createPortal } from "react-dom";
+import Button from "@/components/ui/button/Button";
+import ModalBox from "@/components/ui/modal/ModalBox";
+import FormSelect from "@/components/ui/forms/FormSelect";
+import FormUserSkeleton from "@/components/skeletons/inputForm/formUserSkeleton";
 
 type UpdateUserModalProps = {
     userIdToUpdate: string;
@@ -24,10 +26,18 @@ export default function UpdateUserModal({
     onClose,
     onDone,
 }: UpdateUserModalProps) {
-    const [mounted, setMounted] = useState(false);
-
     const [role, setRole] = useState<UserRole>(UserRole.USER);
     const [isActive, setIsActive] = useState<boolean>(true);
+
+    const { mutate: updateUser, isPending: isPendingUpdate } = useUpdateUser();
+    const { data: user, isPending, isError } = useUserById(userIdToUpdate);
+
+    useEffect(() => {
+        if (isOpen && user) {
+            setRole(user.data.role || UserRole.USER);
+            setIsActive(user.data.isActive);
+        }
+    }, [isOpen, user]);
 
     const handleClose = () => {
         resetValue();
@@ -38,17 +48,6 @@ export default function UpdateUserModal({
         setRole(UserRole.USER);
         setIsActive(true);
     }
-
-    const { mutate: updateUser, isPending } = useUpdateUser();
-
-    const { data: user, isLoading, isError } = useUserById(userIdToUpdate);
-
-    useEffect(() => {
-        if (isOpen && user) {
-            setRole(user.data.role || UserRole.USER);
-            setIsActive(user.data.isActive);
-        }
-    }, [isOpen, user]);
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,94 +77,69 @@ export default function UpdateUserModal({
         });
     };
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
-
-    if (!mounted || !isOpen) return null;
+    if (!isOpen) return null;
 
     if (isError) return <ErrorComponent />;
 
-    return createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
-                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
+    return (
+        <ModalBox isOpen={isOpen} onClose={handleClose}>
+            <ModalBox.Header>
+                <h2>Update User</h2>
+            </ModalBox.Header>
 
-                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
-                    Update User
-                </h2>
-
-                <div className="space-y-5 mt-6 overflow-y-auto px-4">
-                    {/* Role Selection */}
-                    <div>
-                        <label htmlFor="role" className="block text-sm font-bold text-gray-700">
-                            Role <span className="text-red-500">*</span>
-                        </label>
-                        <select
+            <ModalBox.Body>
+                {isPending ? (
+                    <FormUserSkeleton />
+                ) : (
+                    <>
+                        <FormSelect
+                            label="Role"
                             id="role"
                             value={role}
                             onChange={(e) => setRole(e.target.value as UserRole)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            disabled={isLoading}
+                            options={Object.values(UserRole).map((r) => ({ value: r, label: r }))}
                             required
-                        >
-                            <option value="" disabled>
-                                Select role
-                            </option>
-                            {Object.values(UserRole).map((r) => (
-                                <option key={r} value={r}>
-                                    {r}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            placeholder="Select a role"
+                            disabled={isPending || isPendingUpdate}
+                            isLoading={isPendingUpdate}
+                        />
 
-                    {/* Active Status */}
-                    <div className="mt-4">
-                        <label htmlFor="isActive" className="block text-sm font-bold text-gray-700">
-                            Status <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            id="isActive"
+                        <FormSelect
+                            label="Status"
+                            id="status"
                             value={isActive ? "active" : "inactive"}
                             onChange={(e) => setIsActive(e.target.value === "active")}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            disabled={isLoading}
+                            options={[
+                                { value: "active", label: "Active" },
+                                { value: "inactive", label: "Inactive" },
+                            ]}
                             required
-                        >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                </div>
+                            placeholder="Select a status"
+                            disabled={isPending || isPendingUpdate}
+                            isLoading={isPendingUpdate}
+                        />
+                    </>
+                )}
+            </ModalBox.Body>
 
-                {/* Actions */}
-                <div className="flex justify-end items-center mt-8 space-x-4">
-                    <button
-                        onClick={handleSave}
-                        className="px-5 py-2 rounded-lg text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
-                        disabled={isPending || isLoading}
-                    >
-                        {isPending ? (
-                            <>
-                                <FaSpinner className="animate-spin mr-2" />
-                                Saving...
-                            </>
-                        ) : (
-                            "Update"
-                        )}
-                    </button>
+            <ModalBox.Footer>
+                <Button
+                    onClick={handleSave}
+                    loading={isPendingUpdate}
+                    disabled={isPendingUpdate}
+                    variant="primary"
+                    icon={isPendingUpdate ? <FaSpinner className="animate-spin" /> : undefined}
+                >
+                    {isPendingUpdate ? "Updating" : "Update"}
+                </Button>
 
-                    <button
-                        onClick={handleClose}
-                        className="px-5 py-3 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 flex items-center justify-center"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>,
-        document.body
+                <Button
+                    onClick={handleClose}
+                    variant="secondary"
+                >
+                    Cancel
+                </Button>
+            </ModalBox.Footer>
+        </ModalBox>
     );
 }

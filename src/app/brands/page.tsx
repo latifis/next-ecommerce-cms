@@ -3,14 +3,16 @@
 import { useEffect, useState } from "react";
 import { Brand } from "@/types/brand/brand";
 import { FaPlus } from "react-icons/fa";
-import BrandSearchSort from "./BrandSearchSort";
 import BrandList from "./BrandList";
-import Pagination from "@/components/Pagination";
+import Pagination from "@/components/ui/table/Pagination";
 import { useBrands } from "@/satelite/services/brandService";
 import AddBrandModal from "./modals/AddBrandModal";
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import UpdateBrandModal from "./modals/UpdateBrandModal";
 import DetailBrandModal from "./modals/DetailBrandModal";
+import PageHeader from "@/components/ui/layout/PageHeader";
+import { BRAND_SORT_FIELDS } from "@/lib/constant";
+import SearchSortBar from "@/components/ui/table/SearchSortBar";
 
 export default function BrandPage() {
     const [search, setSearch] = useState("");
@@ -67,35 +69,26 @@ export default function BrandPage() {
     return (
         <>
             <div className="p-8 min-h-screen space-y-8">
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Manage Brands</h1>
-                        <p className="text-gray-600 text-sm mt-2">
-                            Manage brand information to maintain product identity and trust.
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleAddBrand}
-                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-6 py-3 rounded-lg shadow hover:bg-blue-200"
-                    >
-                        <FaPlus />
-                        <span>Add Brand</span>
-                    </button>
-                </div>
+                <PageHeader
+                    title="Manage Brands"
+                    subtitle="Manage brand information to maintain product identity and trust."
+                    actionLabel="Add Brand"
+                    onAction={handleAddBrand}
+                    actionIcon={<FaPlus />}
+                />
 
-                {/* Search and Sort */}
-                <BrandSearchSort
+                <SearchSortBar
                     search={search}
                     setSearch={setSearch}
+                    sortFields={BRAND_SORT_FIELDS}
                     sortField={sortField}
                     sortOrder={sortOrder}
                     setSortField={setSortField}
                     setSortOrder={setSortOrder}
+                    pageSizes={[5, 10, 15, 20]}
                     setPageSize={setPageSize}
                 />
 
-                {/* Brand Table */}
                 <BrandList
                     onUpdate={handleUpdateBrand}
                     onClickDetail={handleClickDetail}
@@ -108,7 +101,6 @@ export default function BrandPage() {
                     pageSize={pageSize}
                 />
 
-                {/* Pagination */}
                 <Pagination
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
@@ -117,19 +109,18 @@ export default function BrandPage() {
                 />
             </div>
 
+            {/* MODAL */}
             <AddBrandModal
                 isOpen={isModalAddOpen}
                 onClose={() => setIsModalAddOpen(false)}
                 onDone={refetch}
             />
-
             <UpdateBrandModal
                 isOpen={isModalUpdateOpen}
                 brandIdToUpdate={brandIdToUpdate}
                 onClose={() => setIsModalUpdateOpen(false)}
                 onDone={refetch}
             />
-
             <DetailBrandModal
                 isOpen={isModalDetailOpen}
                 brandId={brandIdDetail}

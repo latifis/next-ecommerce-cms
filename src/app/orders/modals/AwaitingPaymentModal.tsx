@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { FaExclamationCircle } from "react-icons/fa";
-import OrderFlow from "@/components/OrderFlow";
-import CloseButton from "@/components/ui/CloseButton";
+import OrderFlow from "@/components/ui/layout/OrderFlow";
+import CloseButton from "@/components/ui/button/CloseButton";
 import { createPortal } from "react-dom";
 
 type AwaitingPaymentModalProps = {

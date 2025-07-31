@@ -1,14 +1,14 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useUserById } from "@/satelite/services/userService";
 import { formatDateAndTime } from "@/utils/formatDateAndTime";
 import Image from "next/image";
 import { DEFAULT_USER_URL } from "@/lib/constant";
-import CloseButton from "@/components/ui/CloseButton";
+import CloseButton from "@/components/ui/button/CloseButton";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
-import StateIndicator from "@/components/StateIndicator";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
 
 type DetailUserModalProps = {
     userId: string | undefined;

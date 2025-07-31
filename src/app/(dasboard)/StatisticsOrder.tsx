@@ -1,6 +1,6 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import StatisticsSkeleton from "@/components/skeletons/dashboard/StatisticsSkeleton";
 import { useStatistics } from "@/satelite/services/statisticService";
 import Link from "next/link";

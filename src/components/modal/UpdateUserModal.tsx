@@ -1,15 +1,15 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useUpdateThisUser, useUser } from "@/satelite/services/userService";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import CloseButton from "@/components/ui/CloseButton";
+import CloseButton from "@/components/ui/button/CloseButton";
 import { createPortal } from "react-dom";
 import { Gender } from "@/enum/gender";
 import { Language } from "@/enum/language";
 import PersonalSection from "../dashboard/PersonalSection";
-import StateIndicator from "../StateIndicator";
+import StateIndicator from "../ui/feedback/StateIndicator";
 
 type UpdateUserModalProps = {
     isOpen: boolean;

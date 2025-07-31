@@ -1,4 +1,4 @@
-import CloseButton from "@/components/ui/CloseButton";
+import CloseButton from "@/components/ui/button/CloseButton";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";

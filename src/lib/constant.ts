@@ -1,9 +1,33 @@
-export const CATEGORY_SORT_FIELDS = ["name", "description", "updatedAt"];
-export const BRAND_SORT_FIELDS = ["name", "description", "updatedAt"];
-export const PROUDCT_SORT_FIELDS = ["name", "price", "stock", "updatedAt"];
-export const BANNER_SORT_FIELDS = ["name", "updatedAt"];
-export const ORDER_SORT_FIELDS = ["updatedAt"];
-export const USER_SORT_FIELDS = ["name", "email", "phone", "updatedAt"];
+import { Banner } from "@/types/banner/banner";
+import { Brand } from "@/types/brand/brand";
+import { Category } from "@/types/category/category";
+import { Order } from "@/types/order/order";
+import { Product } from "@/types/product/product";
+import { User } from "@/types/user/user";
+
+export const CATEGORY_SORT_FIELDS: (keyof Category)[] = [
+    "name", "updatedAt", "createdAt"
+];
+
+export const BRAND_SORT_FIELDS: (keyof Brand)[] = [
+    "name", "description", "updatedAt"
+];
+
+export const PRODUCT_SORT_FIELDS: (keyof Product)[] = [
+    "name", "price", "stock", "updatedAt"
+];
+
+export const BANNER_SORT_FIELDS: (keyof Banner)[] = [
+    "name", "updatedAt"
+];
+
+export const ORDER_SORT_FIELDS: (keyof Order)[] = [
+    "updatedAt"
+];
+
+export const USER_SORT_FIELDS: (keyof User)[] = [
+    "name", "email", "phone", "updatedAt"
+];
 
 export const SORT_ORDER_ASC = 'asc';
 export const SORT_ORDER_DESC = 'desc';

@@ -1,6 +1,6 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useOrderById, useVerifyPayment } from "@/satelite/services/orderService";
 import React, { useEffect, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
@@ -10,12 +10,12 @@ import { PaymentStatus } from "@/enum/paymentStatus";
 import { AxiosError } from "axios";
 import { Payment } from "@/types/order/payment";
 import { DEFAULT_IMAGE_URL } from "@/lib/constant";
-import OrderFlow from "@/components/OrderFlow";
-import AgreementCheckbox from "@/components/AgreementCheckbox";
-import CloseButton from "@/components/ui/CloseButton";
+import OrderFlow from "@/components/ui/layout/OrderFlow";
+import AgreementCheckbox from "@/components/ui/forms/AgreementCheckbox";
+import CloseButton from "@/components/ui/button/CloseButton";
 import { createPortal } from "react-dom";
-import StateIndicator from "@/components/StateIndicator";
-import PopupImage from "@/components/ui/PopupImage";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
+import PopupImage from "@/components/ui/modal/PopupImage";
 
 type VerifyPaymentModalProps = {
     paymentId: string | undefined;

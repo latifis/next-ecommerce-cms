@@ -1,18 +1,18 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useOrderById } from "@/satelite/services/orderService";
 import { FaTimes } from "react-icons/fa";
 import { formatDateAndTime } from "@/utils/formatDateAndTime";
-import OrderFlow from "@/components/OrderFlow";
+import OrderFlow from "@/components/ui/layout/OrderFlow";
 import { PaymentStatus } from "@/enum/paymentStatus";
 import { OrderStatus } from "@/enum/orderStatus";
 import { DEFAULT_IMAGE_URL } from "@/lib/constant";
 import { formatCurrency } from "@/utils/formatCurrency";
-import PopupImage from "@/components/ui/PopupImage";
+import PopupImage from "@/components/ui/modal/PopupImage";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import StateIndicator from "@/components/StateIndicator";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import OrderItemView from "@/components/card/OrderItemView";
 
 type DetailOrderModalProps = {

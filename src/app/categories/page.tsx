@@ -3,14 +3,16 @@
 import { useEffect, useState } from "react";
 import { Category } from "@/types/category/category";
 import { FaPlus } from "react-icons/fa";
-import CategorySearchSort from "./CategorySearchSort";
 import CategoryList from "./CategoryList";
-import Pagination from "@/components/Pagination";
+import Pagination from "@/components/ui/table/Pagination";
 import { useCategories } from "@/satelite/services/categoryService";
 import AddCategoryModal from "./modals/AddCategoryModal";
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import UpdateCategoryModal from "./modals/UpdateCategoryModal";
 import DetailCategoryModal from "./modals/DetailCategoryModal";
+import { CATEGORY_SORT_FIELDS } from "@/lib/constant";
+import SearchSortBar from "@/components/ui/table/SearchSortBar";
+import PageHeader from "@/components/ui/layout/PageHeader";
 
 export default function CategoryPage() {
     const [search, setSearch] = useState("");
@@ -67,35 +69,26 @@ export default function CategoryPage() {
     return (
         <>
             <div className="p-8 min-h-screen space-y-8">
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Manage Categories</h1>
-                        <p className="text-gray-600 text-sm mt-2">
-                            Organize your products by category to improve customer navigation.
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleAddCategory}
-                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-6 py-3 rounded-lg shadow hover:bg-blue-200"
-                    >
-                        <FaPlus />
-                        <span>Add Category</span>
-                    </button>
-                </div>
+                <PageHeader
+                    title="Manage Categories"
+                    subtitle="Organize your products by category to improve customer navigation."
+                    actionLabel="Add Category"
+                    onAction={handleAddCategory}
+                    actionIcon={<FaPlus />}
+                />
 
-                {/* Search and Sort */}
-                <CategorySearchSort
+                <SearchSortBar
                     search={search}
                     setSearch={setSearch}
+                    sortFields={CATEGORY_SORT_FIELDS}
                     sortField={sortField}
                     sortOrder={sortOrder}
                     setSortField={setSortField}
                     setSortOrder={setSortOrder}
+                    pageSizes={[5, 10, 15, 20]}
                     setPageSize={setPageSize}
                 />
 
-                {/* Category Table */}
                 <CategoryList
                     onUpdate={handleUpdateCategory}
                     onClickDetail={handleClickDetail}
@@ -108,7 +101,6 @@ export default function CategoryPage() {
                     pageSize={pageSize}
                 />
 
-                {/* Pagination */}
                 <Pagination
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
@@ -117,19 +109,18 @@ export default function CategoryPage() {
                 />
             </div>
 
+            {/* MODAL */}
             <AddCategoryModal
                 isOpen={isModalAddOpen}
                 onClose={() => setIsModalAddOpen(false)}
                 onDone={refetch}
             />
-
             <UpdateCategoryModal
                 isOpen={isModalUpdateOpen}
                 categoryIdToUpdate={categoryIdToUpdate}
                 onClose={() => setIsModalUpdateOpen(false)}
                 onDone={refetch}
             />
-
             <DetailCategoryModal
                 isOpen={isModalDetailOpen}
                 categoryId={categoryIdDetail}

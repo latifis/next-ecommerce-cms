@@ -2,14 +2,16 @@
 
 import { Banner } from "@/types/banner/banner";
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa"
-import BannerSearchSort from "./BannerSearchSort";
+import { FaPlus } from "react-icons/fa";
 import BannerList from "./BannerList";
 import { useBanner } from "@/satelite/services/bannerService";
-import Pagination from "@/components/Pagination";
-import ErrorComponent from "@/components/Error";
+import Pagination from "@/components/ui/table/Pagination";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import AddBannerModal from "./modals/AddBannerModal";
 import UpdateBannerModal from "./modals/UpdateBannerModal";
+import PageHeader from "@/components/ui/layout/PageHeader";
+import { BANNER_SORT_FIELDS } from "@/lib/constant";
+import SearchSortBar from "@/components/ui/table/SearchSortBar";
 
 export default function BannerPage() {
     const [search, setSearch] = useState("");
@@ -24,10 +26,6 @@ export default function BannerPage() {
 
     const [banners, setBanners] = useState<Banner[]>([]);
     const [totalItems, setTotalItems] = useState(0);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [search, sortField, sortOrder, pageSize]);
 
     const filters = {
         page: currentPage,
@@ -45,6 +43,10 @@ export default function BannerPage() {
         }
     }, [data]);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, sortField, sortOrder, pageSize]);
+
     const handleAddBanner = () => {
         setIsModalAddOpen(true);
     }
@@ -54,36 +56,28 @@ export default function BannerPage() {
         setIsModalUpdateOpen(true);
     }
 
-    if (isError) {
-        return <ErrorComponent />
-    }
+    if (isError) return <ErrorComponent />
+
     return (
         <>
             <div className="p-8 min-h-screen space-y-8">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Manage Banner</h1>
-                        <p className="text-gray-600 text-sm mt-2">
-                            Create and update promotional banners to boost visibility and sales.
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleAddBanner}
-                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-6 py-3 rounded-lg shadow hover:bg-blue-200"
-                    >
-                        <FaPlus />
-                        <span>Add Banner</span>
-                    </button>
-                </div>
+                <PageHeader
+                    title="Manage Banner"
+                    subtitle="Create and update promotional banners to boost visibility and sales."
+                    actionLabel="Add Banner"
+                    onAction={handleAddBanner}
+                    actionIcon={<FaPlus />}
+                />
 
-                {/* Search and Sort */}
-                <BannerSearchSort
+                <SearchSortBar
                     search={search}
                     setSearch={setSearch}
+                    sortFields={BANNER_SORT_FIELDS}
                     sortField={sortField}
                     sortOrder={sortOrder}
                     setSortField={setSortField}
                     setSortOrder={setSortOrder}
+                    pageSizes={[5, 10, 15, 20]}
                     setPageSize={setPageSize}
                 />
 

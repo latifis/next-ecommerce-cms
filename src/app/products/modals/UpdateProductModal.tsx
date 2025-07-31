@@ -1,16 +1,20 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useCategories } from "@/satelite/services/categoryService";
 import { useProductById, useUpdateProduct } from "@/satelite/services/productService";
 import { AxiosError } from "axios";
-import Image from "next/image";
 import React, { useState, useEffect } from "react";
-import { FaCloudUploadAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useBrands } from "@/satelite/services/brandService";
-import { createPortal } from "react-dom";
-import CloseButton from "@/components/ui/CloseButton";
+import Button from "@/components/ui/button/Button";
+import ModalBox from "@/components/ui/modal/ModalBox";
+import FormField from "@/components/ui/forms/FormField";
+import FormSelect from "@/components/ui/forms/FormSelect";
+import FormFileUpload from "@/components/ui/forms/FormFileUpload";
+import { toOptions } from "@/utils/options";
+import FormProductSkeleton from "@/components/skeletons/inputForm/formProductSkeleton";
+import { FaSpinner } from "react-icons/fa";
 
 type UpdateProductModalProps = {
     productIdToUpdate: string | undefined;
@@ -25,13 +29,10 @@ export default function UpdateProductModal({
     onClose,
     onDone,
 }: UpdateProductModalProps) {
-    const [mounted, setMounted] = useState(false);
-
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState<number>(2500);
     const [stock, setStock] = useState<number>(100);
-    const [imageUrl, setImageUrl] = useState("");
     const [categoryId, setCategoryId] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [brandId, setBrandId] = useState("");
@@ -42,27 +43,19 @@ export default function UpdateProductModal({
     const [code, setCode] = useState("");
 
     const units = [
-        'Piece',
-        'Box',
-        'Kilogram',
-        'Gram',
-        'Liter',
-        'Milliliter',
-        'Pack',
-        'Bottle',
-        'Can',
-        'Bag',
-        'Sachet',
-        'Tube',
-        'Jar',
-        'Bar',
-        'Roll',
-        'Dozen',
-        'Set',
-        'Bundle',
-        'Carton',
-        'Pouch'
+        'Piece', 'Box', 'Kilogram', 'Gram', 'Liter', 'Milliliter', 'Pack', 'Bottle',
+        'Can', 'Bag', 'Sachet', 'Tube', 'Jar', 'Bar', 'Roll', 'Dozen', 'Set', 'Bundle',
+        'Carton', 'Pouch'
     ];
+
+    const filters = { limit: 10000 };
+    const { mutate: updateProduct, isPending: isPendingUpdate } = useUpdateProduct(productIdToUpdate)
+    const { data: product, isPending, isError } = useProductById(productIdToUpdate);
+    const { data: categoryData, isPending: isPendingCategory, isError: isErrorCategory } = useCategories(filters)
+    const { data: brandData, isPending: isPendingBrand, isError: isErrorBrand } = useBrands(filters);
+
+    const categoryOptions = toOptions(categoryData?.data.data, "id", "name");
+    const brandOptions = toOptions(brandData?.data.data, "id", "name");
 
     const handleClose = () => {
         resetValue();
@@ -74,7 +67,6 @@ export default function UpdateProductModal({
         setDescription("");
         setPrice(2500);
         setStock(100);
-        setImageUrl("");
         setCategoryId("");
         setImageFile(null);
         setBrandId("");
@@ -85,25 +77,12 @@ export default function UpdateProductModal({
         setCode("");
     }
 
-    const filters = {
-        limit: 10000,
-    };
-
-    const { mutate: updateProduct, isPending } = useUpdateProduct(productIdToUpdate);
-
-    const { data: product, isLoading, isError } = useProductById(productIdToUpdate);
-
-    const { data: categoryData, isLoading: isLoadingGetCategories, isError: isErrorGetCategories } = useCategories(filters);
-
-    const { data: brandData, isLoading: isLoadingBrand, isError: isErrorBrand } = useBrands(filters);
-
     useEffect(() => {
         if (isOpen && product) {
             setName(product.data.name || "");
             setDescription(product.data.description || "");
             setPrice(product.data.price || 0);
             setStock(product.data.stock || 0);
-            setImageUrl(product.data.imageUrl || "");
             setCategoryId(product.data.categoryId || "");
             setBrandId(product.data.brandId || "");
             setImageFile(null);
@@ -171,358 +150,181 @@ export default function UpdateProductModal({
                 }
             }
         });
-    };
+    }
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
+    if (isError || isErrorCategory || isErrorBrand) return <ErrorComponent />
 
-    if (isError || isErrorGetCategories || isErrorBrand) return <ErrorComponent />
+    if (!isOpen) return null;
 
-    if (!mounted || !isOpen) return null;
+    return (
+        <ModalBox isOpen={isOpen} onClose={handleClose}>
+            <ModalBox.Header>
+                <h2>Update Product</h2>
+            </ModalBox.Header>
 
-    return createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
-                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
-
-                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
-                    Update Product
-                </h2>
-
-                <div className="space-y-6 mt-2 overflow-y-auto px-4">
-                    {/* Product Name */}
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-bold text-gray-700">
-                            Product Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
+            <ModalBox.Body>
+                {isPending ? (
+                    <FormProductSkeleton />
+                ) : (
+                    <>
+                        <FormField
+                            label="Name"
                             id="name"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            onChange={e => setName(e.target.value)}
                             placeholder="Enter product name"
+                            disabled={isPendingUpdate}
                             required
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
                         />
-                    </div>
 
-                    {/* Product Code */}
-                    <div>
-                        <label htmlFor="code" className="block text-sm font-bold text-gray-700">
-                            Product Code <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="code"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            placeholder="Enter product code"
-                            required
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                        />
-                    </div>
-
-                    {/* Product Description */}
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-bold text-gray-700">
-                            Product Description
-                        </label>
-                        <textarea
+                        <FormField
+                            label="Description"
                             id="description"
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            onChange={e => setDescription(e.target.value)}
                             placeholder="Enter product description"
+                            disabled={isPendingUpdate}
                             rows={4}
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                        ></textarea>
-                    </div>
+                            type="textarea"
+                        />
 
-                    {/* Product Price */}
-                    <div>
-                        <label htmlFor="price" className="block text-sm font-bold text-gray-700">
-                            Price <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="number"
+                        <FormField
+                            label="Code"
+                            id="code"
+                            value={code}
+                            onChange={e => setCode(e.target.value)}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter code name"
+                            required
+                        />
+
+                        <FormField
+                            label="Price"
                             id="price"
+                            type="number"
                             value={price}
                             onChange={(e) => setPrice(Number(e.target.value))}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            disabled={isPendingUpdate}
                             placeholder="Enter product price"
                             required
-                            min="0"
-                            onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
+                            min={0}
                         />
-                    </div>
 
-                    {/* Product Unit */}
-                    <div>
-                        <label htmlFor="unit" className="block text-sm font-bold text-gray-700">
-                            Unit
-                        </label>
-                        <select
+                        <FormSelect
+                            label="Unit"
                             id="unit"
                             value={unit}
                             onChange={(e) => setUnit(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                        >
-                            <option value="" disabled>Select unit</option>
-                            {units.map((unitOption) => (
-                                <option key={unitOption} value={unitOption}>
-                                    {unitOption}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Product Discount Percentage */}
-                    <div>
-                        <label htmlFor="discountPercentage" className="block text-sm font-bold text-gray-700">
-                            Discount Percentage
-                        </label>
-                        <input
-                            type="number"
-                            id="discountPercentage"
-                            value={discountPercentage}
-                            onChange={(e) => setDiscountPercentage(Number(e.target.value))}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            placeholder="Enter product discount percentage"
-                            min="0"
-                            onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                        />
-                    </div>
-
-                    {/* Product Minimum Quantity for Discount */}
-                    <div>
-                        <label htmlFor="minQuantityForDiscount" className="block text-sm font-bold text-gray-700">
-                            Minimum Quantity for Discount
-                        </label>
-                        <input
-                            type="number"
-                            id="minQuantityForDiscount"
-                            value={minQuantityForDiscount}
-                            onChange={(e) => setMinQuantityForDiscount(Number(e.target.value))}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            placeholder="Enter product minimum quantity for discount"
-                            min="0"
-                            onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                        />
-                    </div>
-
-                    {/* Product Bulk Discount Price */}
-                    <div>
-                        <label htmlFor="bulkDiscountPrice" className="block text-sm font-bold text-gray-700">
-                            Bulk Discount Price
-                        </label>
-                        <input
-                            type="number"
-                            id="bulkDiscountPrice"
-                            value={bulkDiscountPrice}
-                            onChange={(e) => setBulkDiscountPrice(Number(e.target.value))}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            placeholder="Enter product bulk discount price"
-                            min="0"
-                            onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                        />
-                    </div>
-
-                    {/* Product Stock */}
-                    <div>
-                        <label htmlFor="stock" className="block text-sm font-bold text-gray-700">
-                            Stock <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            id="stock"
-                            value={stock}
-                            onChange={(e) => setStock(Number(e.target.value))}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
-                            placeholder="Enter product stock"
+                            disabled={isPendingUpdate}
+                            options={units.map((unitOption) => ({
+                                value: unitOption,
+                                label: unitOption,
+                            }))}
                             required
-                            min="0"
-                            onWheel={(e) => e.currentTarget.blur()}
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
+                            placeholder="Select unit"
                         />
-                    </div>
 
-                    <div>
-                        <label htmlFor="imageFile" className="block text-sm font-bold text-gray-700">
-                            Image File
-                        </label>
+                        <FormField
+                            label="Discount Percentage"
+                            id="discountPercentage"
+                            type="number"
+                            value={discountPercentage}
+                            onChange={e => setDiscountPercentage(Number(e.target.value))}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter product discount percentage"
+                            min={0}
+                            required
+                        />
 
-                        <div className="relative mb-6 mt-3">
-                            {/* Drag and Drop Area */}
-                            <div
-                                onDrop={(e) => {
-                                    if (isLoading || isLoadingGetCategories || isLoadingBrand || isPending) return;
-                                    e.preventDefault();
-                                    const file = e.dataTransfer.files?.[0];
-                                    if (file) {
-                                        if (file.size > 200000) {
-                                            toast.error("File size must be less than 200KB.");
-                                            return;
-                                        }
-                                        setImageFile(file);
-                                        setImageUrl("");
-                                    }
-                                }}
-                                onDragOver={(e) => {
-                                    if (isLoading || isLoadingGetCategories || isLoadingBrand || isPending) return;
-                                    e.preventDefault();
-                                }}
-                                onClick={() => {
-                                    if (isLoading || isLoadingGetCategories || isLoadingBrand || isPending) return;
-                                    document.getElementById('file-input')?.click();
-                                }}
-                                aria-disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                                className={`border-4 border-dashed border-gray-300 rounded-lg p-8 mb-4 flex items-center justify-center text-gray-500 transition-all duration-300 relative h-48
-                        ${isLoading || isLoadingGetCategories || isLoadingBrand || isPending ? "cursor-not-allowed pointer-events-none bg-gray-200" : "hover:border-blue-400 hover:bg-blue-50 cursor-pointer"}`}
-                            >
-                                {/* If image is uploaded or imageUrl is provided */}
-                                {(imageFile || imageUrl) ? (
-                                    <div className="absolute inset-0 flex justify-center items-center">
-                                        <Image
-                                            src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
-                                            alt="Uploaded File"
-                                            width={128}
-                                            height={128}
-                                            className="object-cover rounded-lg"
-                                            unoptimized
-                                            onLoad={() => {
-                                                if (imageFile) URL.revokeObjectURL(URL.createObjectURL(imageFile));
-                                            }}
-                                        />
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (imageFile) {
-                                                    setImageFile(null);
-                                                    URL.revokeObjectURL(URL.createObjectURL(imageFile));
-                                                } else if (imageUrl) {
-                                                    setImageUrl("");
-                                                }
-                                            }}
-                                            className="absolute top-2 right-2 bg-transparent text-red-500 hover:text-red-700 p-1 rounded-full z-10"
-                                        >
-                                            <FaTimes className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center">
-                                        <FaCloudUploadAlt className="text-4xl text-gray-400 mb-2" />
-                                        <p className="text-sm text-gray-500">
-                                            Drag and drop an image file here, or click to select a file.
-                                        </p>
-                                        <p className="text-xs text-gray-400">
-                                            No image selected. A default image will be used if no file is uploaded.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                        <FormField
+                            label="Min Quantity For Discount"
+                            id="minQuantityForDiscount"
+                            type="number"
+                            value={minQuantityForDiscount}
+                            onChange={e => setMinQuantityForDiscount(Number(e.target.value))}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter product min quantity for discount"
+                            min={0}
+                            required
+                        />
 
-                            {/* Hidden File Input (only triggered by clicking the drop area) */}
-                            <input
-                                type="file"
-                                id="file-input"
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        if (file.size > 200000) {
-                                            toast.error("File size must be less than 200KB.");
-                                            return;
-                                        }
-                                        setImageFile(file);
-                                        setImageUrl("");
-                                    }
-                                }}
-                                className="hidden"
-                                disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                            />
-                        </div>
-                    </div>
+                        <FormField
+                            label="Bulk Discount Price"
+                            id="bulkDiscountPrice"
+                            type="number"
+                            value={bulkDiscountPrice}
+                            onChange={e => setBulkDiscountPrice(Number(e.target.value))}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter product bulk discount price"
+                            min={0}
+                            required
+                        />
 
-                    {/* Product Category */}
-                    <div>
-                        <label htmlFor="categoryName" className="block text-sm font-bold text-gray-700">
-                            Category Name <span className="text-red-500">*</span>
-                        </label>
-                        <select
+                        <FormField
+                            label="Stock"
+                            id="stock"
+                            type="number"
+                            value={stock}
+                            onChange={e => setStock(Number(e.target.value))}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter product stock"
+                            min={0}
+                            required
+                        />
+
+                        <FormFileUpload
+                            label="Product Logo"
+                            file={imageFile}
+                            setFile={setImageFile}
+                            disabled={isPendingUpdate}
+                            maxSize={200_000}
+                        />
+
+                        <FormSelect
+                            label="Category Name"
                             id="categoryName"
                             value={categoryId}
                             onChange={(e) => setCategoryId(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            options={categoryOptions}
                             required
-                            disabled={isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                        >
-                            <option value="" disabled>Select a category</option>
-                            {categoryData?.data.data.map((category, index) => (
-                                <option key={index} value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            placeholder="Select a category"
+                            disabled={isPendingCategory || isPendingUpdate}
+                            isLoading={isPendingCategory}
+                        />
 
-                    {/* Product Brand */}
-                    <div>
-                        <label htmlFor="brandName" className="block text-sm font-bold text-gray-700">
-                            Brand Name <span className="text-red-500">*</span>
-                        </label>
-                        <select
+                        <FormSelect
+                            label="Brand Name"
                             id="brandName"
                             value={brandId}
                             onChange={(e) => setBrandId(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 text-gray-900"
+                            options={brandOptions}
                             required
-                            disabled={isLoading || isLoadingBrand}
-                        >
-                            <option value="" disabled>Select a brand</option>
-                            {brandData?.data.data.map((brand, index) => (
-                                <option key={index} value={brand.id}>
-                                    {brand.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                            placeholder="Select a brand"
+                            disabled={isPendingBrand || isPendingUpdate}
+                            isLoading={isPendingBrand}
+                        />
+                    </>
+                )}
+            </ModalBox.Body>
 
-                {/* Actions */}
-                <div className="flex justify-end items-center mt-10 space-x-4">
-                    <button
-                        onClick={handleSave}
-                        className="px-5 py-3 rounded-lg text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 flex items-center justify-center"
-                        disabled={isPending || isLoading || isLoadingGetCategories || isLoadingBrand || isPending}
-                    >
-                        {isPending ? (
-                            <>
-                                <FaSpinner className="animate-spin mr-2" />
-                                Saving...
-                            </>
-                        ) : (
-                            "Update"
-                        )}
-                    </button>
+            <ModalBox.Footer>
+                <Button
+                    onClick={handleSave}
+                    loading={isPendingUpdate}
+                    disabled={isPendingUpdate}
+                    variant="primary"
+                    icon={isPendingUpdate ? <FaSpinner className="animate-spin" /> : undefined}
+                >
+                    {isPendingUpdate ? "Updating" : "Update"}
+                </Button>
 
-                    <button
-                        onClick={handleClose}
-                        className="px-5 py-3 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 flex items-center justify-center"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>,
-        document.body
-    );
+                <Button
+                    onClick={handleClose}
+                    variant="secondary"
+                >
+                    Cancel
+                </Button>
+            </ModalBox.Footer>
+        </ModalBox>
+    )
 }

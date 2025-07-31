@@ -3,14 +3,16 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product/product";
 import { FaPlus } from "react-icons/fa";
-import ProductSearchSort from "./ProductSearchSort";
 import ProductList from "./ProductList";
-import Pagination from "@/components/Pagination";
-import ErrorComponent from "@/components/Error";
+import Pagination from "@/components/ui/table/Pagination";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useProducts } from "@/satelite/services/productService";
 import AddProductModal from "./modals/AddProductModal";
 import UpdateProductModal from "./modals/UpdateProductModal";
 import DetailProductModal from "./modals/DetailProductModal";
+import PageHeader from "@/components/ui/layout/PageHeader";
+import SearchSortBar from "@/components/ui/table/SearchSortBar";
+import { PRODUCT_SORT_FIELDS } from "@/lib/constant";
 
 export default function ProductPage() {
     const [search, setSearch] = useState("");
@@ -18,10 +20,10 @@ export default function ProductPage() {
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
-
     const [isModalAddOpen, setIsModalAddOpen] = useState(false);
     const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+
     const [productIdToUpdate, setProductIdToUpdate] = useState<string | undefined>("");
     const [productIdDetail, setProductIdDetail] = useState<string | undefined>("");
 
@@ -68,35 +70,26 @@ export default function ProductPage() {
     return (
         <>
             <div className="p-8 min-h-screen space-y-8">
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Manage Products</h1>
-                        <p className="text-gray-600 text-sm mt-2">
-                            Monitor and manage your product listings, prices, and availability.
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleAddProduct}
-                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-6 py-3 rounded-lg shadow hover:bg-blue-200"
-                    >
-                        <FaPlus />
-                        <span>Add Product</span>
-                    </button>
-                </div>
+                <PageHeader
+                    title="Manage Products"
+                    subtitle="Monitor and manage your product listings, prices, and availability."
+                    actionLabel="Add Product"
+                    onAction={handleAddProduct}
+                    actionIcon={<FaPlus />}
+                />
 
-                {/* Search and Sort */}
-                <ProductSearchSort
+                <SearchSortBar
                     search={search}
                     setSearch={setSearch}
+                    sortFields={PRODUCT_SORT_FIELDS}
                     sortField={sortField}
                     sortOrder={sortOrder}
                     setSortField={setSortField}
                     setSortOrder={setSortOrder}
+                    pageSizes={[5, 10, 15, 20]}
                     setPageSize={setPageSize}
                 />
 
-                {/* Product Table */}
                 <ProductList
                     onUpdate={handleUpdateProduct}
                     onClickDetail={handleClickDetail}
@@ -109,7 +102,6 @@ export default function ProductPage() {
                     pageSize={pageSize}
                 />
 
-                {/* Pagination */}
                 <Pagination
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
@@ -118,19 +110,18 @@ export default function ProductPage() {
                 />
             </div>
 
+            {/* MODAL */}
             <AddProductModal
                 isOpen={isModalAddOpen}
                 onClose={() => setIsModalAddOpen(false)}
                 onDone={refetch}
             />
-
             <UpdateProductModal
                 isOpen={isModalUpdateOpen}
                 productIdToUpdate={productIdToUpdate}
                 onClose={() => setIsModalUpdateOpen(false)}
                 onDone={refetch}
             />
-
             <DetailProductModal
                 isOpen={isModalDetailOpen}
                 productId={productIdDetail}

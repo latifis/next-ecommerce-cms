@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { User } from "@/types/user/user";
-import UserSearchSort from "./UserSearchSort";
 import UserList from "./UserList";
-import Pagination from "@/components/Pagination";
+import Pagination from "@/components/ui/table/Pagination";
 import { useUsers } from "@/satelite/services/userService";
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import UpdateUserModal from "./modals/UpdateUserModal";
 import DetailUserModal from "./modals/DetailUserModal";
 import { UserRole } from "@/enum/userRole";
+import PageHeader from "@/components/ui/layout/PageHeader";
+import SearchSortBar from "@/components/ui/table/SearchSortBar";
+import { USER_SORT_FIELDS } from "@/lib/constant";
 
 export default function UserPage() {
     const [search, setSearch] = useState("");
@@ -23,7 +25,7 @@ export default function UserPage() {
     const [userIdDetail, setUserIdDetail] = useState<string | undefined>("");
     const [userIdToUpdate, setUserIdToUpdate] = useState<string>("");
 
-    const [filterUserRole, setFilterUserRole] = useState<UserRole | null>(null);
+    const [filterUserRole, setFilterUserRole] = useState<UserRole | "">("");
 
     const [users, setUsers] = useState<User[]>([]);
     const [totalItems, setTotalItems] = useState(0);
@@ -59,35 +61,40 @@ export default function UserPage() {
         setIsModalUpdateOpen(true);
         setUserIdToUpdate(userId);
     };
+
+    const userRoleFilter = {
+        label: "User Role",
+        value: filterUserRole,
+        options: Object.values(UserRole).map(role => ({
+            key: role,
+            label: role.charAt(0) + role.slice(1).toLowerCase(),
+        })),
+        onChange: (val: string) => setFilterUserRole(val as UserRole | ""),
+    };
+
     if (isError) return <ErrorComponent />;
 
     return (
         <>
             <div className="p-8 min-h-screen space-y-8">
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Manage Users</h1>
-                        <p className="text-gray-600 text-sm mt-2">
-                            View, add, and manage users with different roles and statuses.
-                        </p>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Manage Users"
+                    subtitle="View, add, and manage users with different roles and statuses."
+                />
 
-                {/* Search and Sort */}
-                <UserSearchSort
+                <SearchSortBar
                     search={search}
                     setSearch={setSearch}
+                    sortFields={USER_SORT_FIELDS as (keyof User)[]}
                     sortField={sortField}
                     sortOrder={sortOrder}
                     setSortField={setSortField}
                     setSortOrder={setSortOrder}
+                    pageSizes={[5, 10, 15, 20]}
                     setPageSize={setPageSize}
-                    userRole={filterUserRole}
-                    setFilterUserRole={setFilterUserRole}
+                    filters={[userRoleFilter]}
                 />
 
-                {/* User Table */}
                 <UserList
                     onUpdate={handleUpdateUser}
                     onClickDetail={handleClickDetail}
@@ -100,7 +107,6 @@ export default function UserPage() {
                     pageSize={pageSize}
                 />
 
-                {/* Pagination */}
                 <Pagination
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
@@ -109,13 +115,13 @@ export default function UserPage() {
                 />
             </div >
 
+            {/* MODAL */}
             <UpdateUserModal
                 isOpen={isModalUpdateOpen}
                 userIdToUpdate={userIdToUpdate}
                 onClose={() => setIsModalUpdateOpen(false)}
                 onDone={refetch}
             />
-
             <DetailUserModal
                 isOpen={isModalDetailOpen}
                 userId={userIdDetail}

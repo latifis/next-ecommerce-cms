@@ -1,7 +1,7 @@
 import { Gender } from "@/enum/gender";
 import { Language } from "@/enum/language";
 import { FaSpinner } from "react-icons/fa";
-import { SectionDivider } from "../ui/SectionDivider";
+import { SectionDivider } from "../ui/layout/SectionDivider";
 
 type PersonalSectionProps = {
     userEmail?: string;

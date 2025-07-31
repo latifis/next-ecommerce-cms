@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useProductById } from "@/satelite/services/productService";
 import { FaTimes } from "react-icons/fa";
 import { formatDateAndTime } from "@/utils/formatDateAndTime";
 import { DEFAULT_PRODUCT_URL } from "@/lib/constant";
-import StateIndicator from "@/components/StateIndicator";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 

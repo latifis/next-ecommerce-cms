@@ -1,12 +1,12 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useBrandById } from "@/satelite/services/brandService";
 import { FaTimes } from "react-icons/fa";
 import { formatDateAndTime } from "@/utils/formatDateAndTime";
 import Image from "next/image";
 import { DEFAULT_BRAND_URL } from "@/lib/constant";
-import StateIndicator from "@/components/StateIndicator";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 

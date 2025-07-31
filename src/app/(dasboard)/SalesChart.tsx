@@ -22,8 +22,9 @@ import {
     useTopPaymentMethods,
     useTopSellingProducts
 } from "@/satelite/services/statisticService";
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import SalesChartSkeleton from "@/components/skeletons/dashboard/SalesChartSkeleton";
+import PageHeader from "@/components/ui/layout/PageHeader";
 
 Chart.register(
     LineController,
@@ -244,12 +245,12 @@ export default function SalesChart() {
     return (
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 mx-2">
             <div className="grid gap-4 w-full">
-                <div>
-                    <h2 className="text-3xl font-semibold text-gray-800">Sales Overview</h2>
-                    <p className="text-gray-600 text-sm mt-2">
-                        A quick summary of the latest orders in your system and sales performance, helping you make better business decisions.
-                    </p>
-                </div>
+
+                <PageHeader
+                    title="Sales Overview"
+                    subtitle="A quick summary of the latest orders in your system and sales performance, helping you make better business decisions."
+                    className="mb-2 mx-2"
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div className="col-span-1 lg:col-span-2 bg-white rounded-lg shadow p-4">

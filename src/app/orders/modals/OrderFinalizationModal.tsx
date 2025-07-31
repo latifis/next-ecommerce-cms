@@ -1,6 +1,6 @@
 "use client";
 
-import ErrorComponent from "@/components/Error";
+import ErrorComponent from "@/components/ui/feedback/Error";
 import { useOrderById, useMarkAsDoneOrder } from "@/satelite/services/orderService";
 import React, { useEffect, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
@@ -8,11 +8,11 @@ import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { Order } from "@/types/order/order";
 import { OrderStatus } from "@/enum/orderStatus";
-import OrderFlow from "@/components/OrderFlow";
-import AgreementCheckbox from "@/components/AgreementCheckbox";
-import CloseButton from "@/components/ui/CloseButton";
+import OrderFlow from "@/components/ui/layout/OrderFlow";
+import AgreementCheckbox from "@/components/ui/forms/AgreementCheckbox";
+import CloseButton from "@/components/ui/button/CloseButton";
 import { createPortal } from "react-dom";
-import StateIndicator from "@/components/StateIndicator";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import OrderItemView from "@/components/card/OrderItemView";
 import { formatCurrency } from "@/utils/formatCurrency";
 

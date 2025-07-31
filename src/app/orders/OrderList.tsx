@@ -1,6 +1,6 @@
 "use client";
 
-import OrderListSkeleton from "@/components/skeletons/OrderListSkeleton";
+import OrderListSkeleton from "@/components/skeletons/list/OrderListSkeleton";
 import { OrderStatus } from "@/enum/orderStatus";
 import { PaymentStatus } from "@/enum/paymentStatus";
 import { SORT_ORDER_ASC, SORT_ORDER_DESC } from "@/lib/constant";

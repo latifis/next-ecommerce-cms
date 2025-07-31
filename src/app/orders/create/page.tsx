@@ -12,7 +12,7 @@ import SearchProductModal from "./modals/SearchProductModal";
 import Header from "./Header";
 import CartItems from "./CartItems";
 import Summary from "./Summary";
-import StateIndicator from "@/components/StateIndicator";
+import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import InputPaymentModal from "./modals/InputPaymentModal";
 import ChangePaymentModal from "./modals/ChangePaymentModal";
 
