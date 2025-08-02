@@ -4,12 +4,11 @@ import ErrorComponent from "@/components/ui/feedback/Error";
 import { useUpdateThisUser, useUser } from "@/satelite/services/userService";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import CloseButton from "@/components/ui/button/CloseButton";
-import { createPortal } from "react-dom";
 import { Gender } from "@/enum/gender";
 import { Language } from "@/enum/language";
 import PersonalSection from "../dashboard/PersonalSection";
 import StateIndicator from "../ui/feedback/StateIndicator";
+import ModalBox from "../ui/modal/ModalBox";
 
 type UpdateUserModalProps = {
     isOpen: boolean;
@@ -20,8 +19,6 @@ export default function UpdateUserModal({
     isOpen,
     onClose,
 }: UpdateUserModalProps) {
-    const [mounted, setMounted] = useState(false);
-
     const [formData, setFormData] = useState({
         name: "",
         phone: "",
@@ -105,49 +102,39 @@ export default function UpdateUserModal({
         });
     };
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
-
-    if (!mounted || !isOpen) return null;
+    if (!isOpen) return null;
 
     if (isError) return <ErrorComponent />;
 
-    return createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] flex flex-col">
-                <CloseButton onClick={handleClose} className="absolute top-4 right-4" />
+    return (
+        <ModalBox isOpen={isOpen} onClose={handleClose}>
+            <ModalBox.Header>
+                <h2>Update User</h2>
+            </ModalBox.Header>
 
-                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
-                    Update User
-                </h2>
-
-                <div className="space-y-5 mt-6 px-4">
-                    {isPending ? (
-                        <StateIndicator
-                            isLoading={isPending}
-                            isError={isError}
-                            className="my-12"
+            <ModalBox.Body>
+                {isPending ? (
+                    <StateIndicator
+                        isLoading={isPending}
+                        isError={isError}
+                        className="my-12"
+                    />
+                ) : user ? (
+                    <div>
+                        {/* Form */}
+                        <PersonalSection
+                            userEmail={user.data.email || ""}
+                            formData={formData}
+                            handleChange={handleChange}
+                            handleSubmit={handleSubmit}
+                            isPendingUpdateUser={isPendingUpdateUser}
+                            isFormChanged={isFormChanged}
                         />
-                    ) : user ? (
-                        <div>
-                            {/* Form */}
-                            <PersonalSection
-                                userEmail={user.data.email || ""}
-                                formData={formData}
-                                handleChange={handleChange}
-                                handleSubmit={handleSubmit}
-                                isPendingUpdateUser={isPendingUpdateUser}
-                                isFormChanged={isFormChanged}
-                            />
-                        </div>
-                    ) : (
-                        <ErrorComponent />
-                    )}
-                </div>
-            </div>
-        </div>,
-        document.body
+                    </div>
+                ) : (
+                    <ErrorComponent />
+                )}
+            </ModalBox.Body>
+        </ModalBox>
     );
 }

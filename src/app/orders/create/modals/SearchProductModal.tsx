@@ -5,10 +5,11 @@ import React, { useRef, useCallback, useEffect, useState } from "react";
 import { Product } from "@/types/product/product";
 import { useDebounce } from "@/satelite/hook/useDebounce";
 import { useAllProducts } from "@/satelite/services/productService";
-import CloseButton from "@/components/ui/button/CloseButton";
 import { DataNotFound } from "@/components/ui/feedback/DataNotFound";
-import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import ProductItemCard from "@/components/card/ProductItemCard";
+import ErrorComponent from "@/components/ui/feedback/Error";
+import ModalBox from "@/components/ui/modal/ModalBox";
+import ProductItemCardSkeleton from "@/components/skeletons/ProductItemCardSkeleton";
 
 type Props = {
     isOpen: boolean;
@@ -81,17 +82,15 @@ export default function SearchProductModal({
 
     if (!isOpen) return null;
 
+    if (isError) return <ErrorComponent />;
+
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-            <div className="bg-white w-full max-w-3xl mx-auto my-8 p-6 rounded-2xl shadow-2xl relative max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <ModalBox isOpen={isOpen} onClose={onClose}>
+            <ModalBox.Header>
+                <h2>Search Product</h2>
+            </ModalBox.Header>
 
-                <CloseButton onClick={onClose} className="absolute top-4 right-4" />
-
-                {/* Modal Header */}
-                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-200 tracking-wide">
-                    Search Product
-                </h2>
-
+            <ModalBox.Body className="overflow-visible max-h-none">
                 <div className="flex items-center gap-2 my-4">
                     <div className="relative w-full">
                         <FaSearch className="absolute left-3 top-3 text-gray-400" />
@@ -106,14 +105,9 @@ export default function SearchProductModal({
                     </div>
                 </div>
 
-                {/* Product List with overflow; max-h dinamis */}
-                <div className="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
+                <div className={`divide-y divide-gray-100 ${products.length > 0 ? "max-h-[60vh] overflow-y-auto" : ""}`}>
                     {isPending ? (
-                        <StateIndicator
-                            isLoading={isPending}
-                            isError={isError}
-                            className="my-12"
-                        />
+                        <ProductItemCardSkeleton />
                     ) : products.length === 0 ? (
                         <DataNotFound
                             title="Your cart is still empty"
@@ -145,11 +139,7 @@ export default function SearchProductModal({
                         </>
                     )}
                 </div>
-                {/* Error message */}
-                {isError && (
-                    <p className="text-sm text-red-500 mt-4 text-center">Failed to load products.</p>
-                )}
-            </div>
-        </div>
+            </ModalBox.Body>
+        </ModalBox>
     );
 }

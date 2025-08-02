@@ -1,7 +1,7 @@
-import CloseButton from "@/components/ui/button/CloseButton";
+import Button from "@/components/ui/button/Button";
+import ModalBox from "@/components/ui/modal/ModalBox";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 type Props = {
     isOpen: boolean;
@@ -13,7 +13,6 @@ type Props = {
 const NOMINALS = [10000, 20000, 30000, 50000, 100000];
 
 export default function InputPaymentModal({ isOpen, onClose, actualTotal, onSubmit }: Props) {
-    const [mounted, setMounted] = useState(false);
     const [selectedNominal, setSelectedNominal] = useState<number | null>(null);
     const [manualInput, setManualInput] = useState(actualTotal.toString());
     const submitRef = useRef<HTMLButtonElement>(null);
@@ -27,11 +26,6 @@ export default function InputPaymentModal({ isOpen, onClose, actualTotal, onSubm
             setSelectedNominal(null);
         }
     }, [isOpen, actualTotal]);
-
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -68,18 +62,15 @@ export default function InputPaymentModal({ isOpen, onClose, actualTotal, onSubm
         }
     };
 
-    if (!mounted || !isOpen) return null;
+    if (!isOpen) return null;
 
-    return createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-            <div className="bg-white w-full max-w-4xl mx-auto my-12 p-8 rounded-3xl shadow-2xl relative max-h-[calc(100vh-3rem)] overflow-y-auto flex flex-col">
-                <CloseButton onClick={onClose} className="absolute top-4 right-4" />
+    return (
+        <ModalBox isOpen={isOpen} onClose={onClose}>
+            <ModalBox.Header>
+                <h2>Enter Payment Amount</h2>
+            </ModalBox.Header>
 
-                {/* Modal Header */}
-                <h2 className="text-2xl font-bold text-center text-gray-900 pb-4 border-b border-blue-100 tracking-wide mb-6">
-                    Enter Payment Amount
-                </h2>
-
+            <ModalBox.Body>
                 {/* Amount Due */}
                 <div className="text-center mb-6">
                     <span className="block text-sm text-gray-500 tracking-wide">Amount to Pay</span>
@@ -129,24 +120,18 @@ export default function InputPaymentModal({ isOpen, onClose, actualTotal, onSubm
                         placeholder="Enter payment amount"
                     />
                 </div>
+            </ModalBox.Body>
 
-                {/* Submit Button */}
-                <button
+            <ModalBox.Footer>
+                <Button
                     ref={submitRef}
-                    type="button"
                     onClick={handleSubmit}
                     disabled={!canSubmit}
-                    className={`w-full py-3 rounded-xl font-semibold text-lg transition
-                        ${canSubmit
-                            ? "bg-blue-100 text-blue-700 hover:bg-blue-200 focus:bg-blue-200"
-                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        }
-                    `}
+                    variant="primary"
                 >
                     Confirm Payment
-                </button>
-            </div>
-        </div>,
-        document.body
+                </Button>
+            </ModalBox.Footer>
+        </ModalBox>
     );
 }

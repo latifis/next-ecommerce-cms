@@ -1,7 +1,7 @@
 import { Gender } from "@/enum/gender";
 import { Language } from "@/enum/language";
-import { FaSpinner } from "react-icons/fa";
 import { SectionDivider } from "../ui/layout/SectionDivider";
+import Button from "../ui/button/Button";
 
 type PersonalSectionProps = {
     userEmail?: string;
@@ -30,7 +30,7 @@ export default function PersonalSection({
     return (
         <form
             onSubmit={handleSubmit}
-            className="w-full space-y-8 mt-[-8px]"
+            className="w-full space-y-8"
         >
             <div className="overflow-y-auto max-h-[calc(100vh-400px)]">
 
@@ -137,25 +137,15 @@ export default function PersonalSection({
                 </div>
             </div>
 
-            <div className="pt-6 flex justify-end">
-                <button
-                    type="submit"
-                    disabled={!isFormChanged || isPendingUpdateUser}
-                    className={`px-6 py-2 rounded-lg font-semibold shadow transition duration-150 focus:ring-2 focus:outline-none ${isFormChanged && !isPendingUpdateUser
-                        ? "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
-                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        }`}
-                >
-                    {isPendingUpdateUser ? (
-                        <div className="flex items-center gap-2">
-                            <FaSpinner className="animate-spin text-gray-500" />
-                            <span>Saving...</span>
-                        </div>
-                    ) : (
-                        "Save Changes"
-                    )}
-                </button>
-            </div>
+            <Button
+                onClick={handleSubmit}
+                loading={isPendingUpdateUser}
+                disabled={!isFormChanged || isPendingUpdateUser}
+                variant="primary"
+                className="w-full my-4"
+            >
+                {isPendingUpdateUser ? "Saving..." : "Save Changes"}
+            </Button>
         </form>
     );
 }

@@ -118,6 +118,7 @@ export default function AddBrandModal({
                     disabled={isPending}
                     variant="primary"
                     icon={!isPending ? undefined : <FaSpinner className="animate-spin" />}
+                    className="w-full"
                 >
                     {isPending ? "Adding" : "Add"}
                 </Button>
@@ -125,6 +126,7 @@ export default function AddBrandModal({
                 <Button
                     onClick={handleClose}
                     variant="secondary"
+                    className="w-full"
                 >
                     Cancel
                 </Button>

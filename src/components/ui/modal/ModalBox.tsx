@@ -31,20 +31,23 @@ function ModalBox({ isOpen, onClose, children }: ModalBoxProps) {
     );
 }
 
-type SectionProps = { children: ReactNode };
+type SectionProps = {
+    children: ReactNode,
+    className?: string;
+};
 
 function ModalHeader({ children }: SectionProps) {
-    return <div className="text-xl font-bold mb-4 border-b pb-3 px-1 text-gray-800">{children}</div>;
+    return <div className="text-xl font-bold mb-4 border-b pb-3 px-1 text-gray-800 text-center">{children}</div>;
 }
 ModalHeader.displayName = "ModalBox.Header";
 
-function ModalBody({ children }: SectionProps) {
-    return <div className="space-y-5 max-h-[60vh] overflow-y-auto px-1 my-6">{children}</div>;
+function ModalBody({ children, className = "" }: SectionProps) {
+    return <div className={`space-y-5 max-h-[60vh] overflow-y-auto px-1 my-6 ${className}`}>{children}</div>;
 }
 ModalBody.displayName = "ModalBox.Body";
 
 function ModalFooter({ children }: SectionProps) {
-    return <div className="flex justify-end items-center space-x-2 my-4 px-1">{children}</div>;
+    return <div className={`grid ${React.Children.count(children) > 1 ? "grid-cols-2" : "grid-cols-1"} gap-4 my-4 px-1`}>{children}</div>;
 }
 ModalFooter.displayName = "ModalBox.Footer";
 
