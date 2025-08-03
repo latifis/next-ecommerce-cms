@@ -35,6 +35,7 @@ export default function UpdateProductModal({
     const [stock, setStock] = useState<number>(100);
     const [categoryId, setCategoryId] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
     const [brandId, setBrandId] = useState("");
     const [unit, setUnit] = useState("");
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
@@ -69,6 +70,7 @@ export default function UpdateProductModal({
         setStock(100);
         setCategoryId("");
         setImageFile(null);
+        setImageUrl(undefined);
         setBrandId("");
         setUnit("");
         setDiscountPercentage(0);
@@ -91,6 +93,7 @@ export default function UpdateProductModal({
             setMinQuantityForDiscount(product.data.minQuantityForDiscount || 0);
             setBulkDiscountPrice(product.data.bulkDiscountPrice || 0);
             setCode(product.data.code || "");
+            setImageUrl(product.data.imageUrl)
         }
     }, [isOpen, product]);
 
@@ -151,6 +154,11 @@ export default function UpdateProductModal({
             }
         });
     }
+
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setImageUrl(undefined);
+    };
 
     if (isError || isErrorCategory || isErrorBrand) return <ErrorComponent />
 
@@ -276,6 +284,8 @@ export default function UpdateProductModal({
                             label="Product Logo"
                             file={imageFile}
                             setFile={setImageFile}
+                            url={imageUrl}
+                            onRemoveUrl={handleRemoveImage}
                             disabled={isPendingUpdate}
                             maxSize={200_000}
                         />

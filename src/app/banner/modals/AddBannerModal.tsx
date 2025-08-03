@@ -134,6 +134,7 @@ export default function AddBannerModal({
                     file={imageFile}
                     setFile={setImageFile}
                     maxSize={200_000}
+                    required
                 />
             </ModalBox.Body>
 

@@ -28,6 +28,7 @@ export default function UpdateBannerModal({
     const [name, setName] = useState("");
     const [mediaType, setMediaType] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
     const [description, setDescription] = useState("");
     const [sequence, setSequence] = useState(0);
 
@@ -53,6 +54,7 @@ export default function UpdateBannerModal({
             setMediaType(banner.data.mediaType || "");
             setDescription(banner.data.description || "");
             setSequence(banner.data.sequence || 0);
+            setImageUrl(banner.data.url);
         }
     }, [isOpen, banner]);
 
@@ -86,6 +88,11 @@ export default function UpdateBannerModal({
             }
         })
     }
+
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setImageUrl(undefined);
+    };
 
     if (!isOpen) return null;
 
@@ -149,8 +156,11 @@ export default function UpdateBannerModal({
                             label="Banner Image"
                             file={imageFile}
                             setFile={setImageFile}
+                            url={imageUrl}
+                            onRemoveUrl={handleRemoveImage}
                             maxSize={200_000}
                             disabled={isPendingUpdate || isPending}
+                            required
                         />
                     </>
                 )}

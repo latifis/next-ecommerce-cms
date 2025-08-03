@@ -107,7 +107,7 @@ export default function Sidebar({ setIsOpen }: SidebarProps) {
             href="/"
             className={`text-xl font-bold truncate hover:text-gray-400 flex items-center gap-2 ${isOpen ? "justify-center" : "justify-start w-full"}`}
           >
-            <span className={`${shouldRenderContent ? "block" : "hidden"} text-xl transition-opacity duration-300`}>E-Commerce</span>
+            <span className={`${shouldRenderContent ? "block" : "hidden"} text-xl transition-opacity duration-300`}>Admin Panel</span>
             <FaBars className={`text-2xl ${isOpen ? "hidden" : "block"}`} />
           </Link>
         </div>

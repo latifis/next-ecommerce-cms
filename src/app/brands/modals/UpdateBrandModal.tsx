@@ -28,6 +28,7 @@ export default function UpdateBrandModal({
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
 
     const { mutate: updateBrand, isPending: isPendingUpdate } = useUpdateBrand(brandIdToUpdate);
     const { data: brand, isPending, isError } = useBrandById(brandIdToUpdate);
@@ -36,6 +37,8 @@ export default function UpdateBrandModal({
         if (isOpen && brand) {
             setName(brand.data.name || "");
             setDescription(brand.data.description || "");
+            setImageFile(null);
+            setImageUrl(brand.data.logoUrl);
         }
     }, [isOpen, brand]);
 
@@ -48,6 +51,7 @@ export default function UpdateBrandModal({
         setName("");
         setDescription("");
         setImageFile(null);
+        setImageUrl(undefined)
     }
 
     const handleSave = (e: React.FormEvent) => {
@@ -82,6 +86,11 @@ export default function UpdateBrandModal({
                 }
             }
         });
+    };
+
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setImageUrl(undefined);
     };
 
     if (!isOpen) return null;
@@ -125,6 +134,8 @@ export default function UpdateBrandModal({
                             label="Logo"
                             file={imageFile}
                             setFile={setImageFile}
+                            url={imageUrl}
+                            onRemoveUrl={handleRemoveImage}
                             maxSize={200_000}
                             disabled={isPendingUpdate}
                         />

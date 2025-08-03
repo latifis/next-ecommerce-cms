@@ -9,6 +9,9 @@ type FormFileUploadProps = {
     setFile: (file: File | null) => void;
     disabled?: boolean;
     maxSize?: number;
+    required?: boolean;
+    url?: string;
+    onRemoveUrl?: () => void;
 };
 
 export default function FormFileUpload({
@@ -17,12 +20,24 @@ export default function FormFileUpload({
     setFile,
     disabled = false,
     maxSize = 200_000,
+    required = false,
+    url,
+    onRemoveUrl,
 }: FormFileUploadProps) {
     const inputFileRef = useRef<HTMLInputElement>(null);
 
+    const imagePreview = file
+        ? URL.createObjectURL(file)
+        : url
+            ? url
+            : undefined;
+
     return (
         <div>
-            <label className="block text-sm font-bold text-gray-700 pl-1 mb-2">{label}</label>
+            <label className="block text-sm font-bold text-gray-700 pl-1 mb-2">
+                {label}
+                {required && <span className="text-red-500 ml-1">*</span>}
+            </label>
             <div
                 onDrop={(e) => {
                     if (disabled) return;
@@ -45,29 +60,39 @@ export default function FormFileUpload({
                     inputFileRef.current?.click();
                 }}
                 aria-disabled={disabled}
-                className={`border-4 border-dashed border-gray-300 rounded-lg p-8 mb-4 flex items-center justify-center text-gray-500 transition-all duration-300 relative h-48
-          ${disabled ? "cursor-not-allowed pointer-events-none bg-gray-200" : "hover:border-blue-400 hover:bg-blue-50 cursor-pointer"}`}
+                className={
+                    `border-4 border-dashed border-gray-300 rounded-lg p-8 mb-4 flex items-center justify-center text-gray-500 transition-all duration-300 relative h-48
+                    ${disabled ? "cursor-not-allowed pointer-events-none bg-gray-200" : "hover:border-blue-400 hover:bg-blue-50 cursor-pointer"}`
+                }
             >
-                {file ? (
+                {imagePreview ? (
                     <div className="absolute inset-0 flex justify-center items-center">
                         <Image
-                            src={URL.createObjectURL(file)}
+                            src={imagePreview}
                             alt="Uploaded"
                             width={128}
                             height={128}
                             className="object-cover rounded-lg"
                             unoptimized
-                            onLoad={() => URL.revokeObjectURL(URL.createObjectURL(file))}
-                        />
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setFile(null);
+                            onLoad={() => {
+                                if (file) URL.revokeObjectURL(imagePreview);
                             }}
-                            className="absolute top-2 right-2 bg-transparent text-red-500 hover:text-red-700 p-1 rounded-full z-10"
-                        >
-                            <FaTimes className="w-5 h-5" />
-                        </button>
+                        />
+                        {(file || url) && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (file) {
+                                        setFile(null);
+                                    } else if (url && onRemoveUrl) {
+                                        onRemoveUrl();
+                                    }
+                                }}
+                                className="absolute top-2 right-2 bg-transparent text-red-500 hover:text-red-700 p-1 rounded-full z-10"
+                            >
+                                <FaTimes className="w-5 h-5" />
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center">
@@ -97,6 +122,7 @@ export default function FormFileUpload({
                 }}
                 className="hidden"
                 disabled={disabled}
+                required={required}
             />
         </div>
     );
