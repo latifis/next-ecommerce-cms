@@ -27,7 +27,7 @@ export const useCategoryById = (categoryId: string | undefined) => {
 
 export const useAddCategory = () => {
   return useMutation({
-    mutationFn: (category: Category) => addCategory(category)
+    mutationFn: (category: Partial<Category>) => addCategory(category)
   });
 };
 

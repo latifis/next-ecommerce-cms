@@ -4,4 +4,5 @@ export interface FetchParams {
     search?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    mediaType?: string;
 }

@@ -33,6 +33,7 @@ export default function BannerPage() {
         search,
         sortField,
         sortOrder,
+        mediaType: "Banner",
     };
 
     const { data, isLoading, isError, refetch } = useBanner(filters);

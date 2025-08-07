@@ -57,7 +57,7 @@ export default function UpdateCategoryModal({
         }
 
         const updatedCategory: Category = {
-            id: categoryIdToUpdate,
+            id: categoryIdToUpdate || "",
             name,
             description,
         };

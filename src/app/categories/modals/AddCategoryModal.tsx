@@ -45,7 +45,7 @@ export default function AddCategoryModal({
             return;
         }
 
-        const newCategory: Category = {
+        const newCategory: Partial<Category> = {
             name: name,
             description: description,
         };

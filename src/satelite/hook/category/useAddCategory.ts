@@ -2,7 +2,7 @@ import { apiClient } from "@/lib/client/axios-client";
 import { Category } from "@/types/category/category";
 
 export const addCategory = async (
-  category: Category
+  category: Partial<Category>
 ) => {
   const response = await apiClient.post(
     `/categories`,

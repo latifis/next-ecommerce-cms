@@ -11,6 +11,11 @@ import ModalBox from "@/components/ui/modal/ModalBox";
 import FormField from "@/components/ui/forms/FormField";
 import FormFileUpload from "@/components/ui/forms/FormFileUpload";
 import FormBannerSkeleton from "@/components/skeletons/inputForm/formBannerSkeleton";
+import { LinkType } from "@/enum/linkType";
+import { useProducts } from "@/satelite/services/productService";
+import { useCategories } from "@/satelite/services/categoryService";
+import { useBrands } from "@/satelite/services/brandService";
+import FormSelect from "@/components/ui/forms/FormSelect";
 
 type UpdateBannerModalProps = {
     bannerIdToUpdate: string | undefined;
@@ -26,14 +31,19 @@ export default function UpdateBannerModal({
     onDone
 }: UpdateBannerModalProps) {
     const [name, setName] = useState("");
-    const [mediaType, setMediaType] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
     const [description, setDescription] = useState("");
     const [sequence, setSequence] = useState(0);
+    const [linkType, setLinkType] = useState<LinkType>(LinkType.PRODUCT)
+    const [linkValue, setLinkValue] = useState("");
 
+    const filters = { limit: 10000 };
     const { mutate: updateBanner, isPending: isPendingUpdate } = useUpdateBanner(bannerIdToUpdate);
     const { data: banner, isPending, isError } = useBannerById(bannerIdToUpdate);
+    const { data: productData, isPending: isPendingProduct, isError: isErrorProduct } = useProducts(filters);
+    const { data: categoryData, isPending: isPendingCategory, isError: isErrorCategory } = useCategories(filters);
+    const { data: brandData, isPending: isPendingBrand, isError: isErrorBrand } = useBrands(filters);
 
     const handleClose = () => {
         resetValue();
@@ -42,7 +52,8 @@ export default function UpdateBannerModal({
 
     const resetValue = () => {
         setName("");
-        setMediaType("");
+        setLinkType(LinkType.PRODUCT);
+        setLinkValue("");
         setImageFile(null);
         setDescription("");
         setSequence(0);
@@ -51,7 +62,8 @@ export default function UpdateBannerModal({
     useEffect(() => {
         if (isOpen && banner) {
             setName(banner.data.name || "");
-            setMediaType(banner.data.mediaType || "");
+            setLinkType(banner.data.linkType || LinkType.PRODUCT)
+            setLinkValue(banner.data.linkValue || "");
             setDescription(banner.data.description || "");
             setSequence(banner.data.sequence || 0);
             setImageUrl(banner.data.url);
@@ -65,7 +77,8 @@ export default function UpdateBannerModal({
         updatedBanner.append("name", name);
         updatedBanner.append("description", description);
         updatedBanner.append("sequence", sequence.toString());
-        updatedBanner.append("mediaType", mediaType);
+        updatedBanner.append("linkType", linkType);
+        updatedBanner.append("linkValue", linkValue);
         if (imageFile) {
             updatedBanner.append("file", imageFile);
         }
@@ -96,7 +109,7 @@ export default function UpdateBannerModal({
 
     if (!isOpen) return null;
 
-    if (isError) return <ErrorComponent />;
+    if (isError || isErrorProduct || isErrorCategory || isErrorBrand) return <ErrorComponent />;
 
     return (
         <ModalBox isOpen={isOpen} onClose={handleClose}>
@@ -142,15 +155,94 @@ export default function UpdateBannerModal({
                             disabled={isPendingUpdate || isPending}
                         />
 
-                        <FormField
-                            label="Media Type"
-                            id="mediaType"
-                            value={mediaType}
-                            onChange={e => setMediaType(e.target.value)}
-                            placeholder="Enter banner media type"
+                        <FormSelect
+                            label="Link Type"
+                            id="linkType"
+                            value={linkType}
+                            onChange={(e) => {
+                                setLinkType(e.target.value as LinkType);
+                                setLinkValue("");
+                            }}
+                            options={Object.values(LinkType).map((linkTypeOption) => ({
+                                value: linkTypeOption,
+                                label: linkTypeOption.charAt(0).toUpperCase() + linkTypeOption.slice(1),
+                            }))}
                             required
                             disabled={isPendingUpdate || isPending}
+                            placeholder="Select link type"
                         />
+
+                        {linkType === LinkType.PRODUCT && (
+                            <FormSelect
+                                label="Select Product"
+                                id="linkValue"
+                                value={linkValue}
+                                onChange={(e) => setLinkValue(e.target.value)}
+                                options={productData?.data?.data?.map((p) => ({
+                                    value: p.id,
+                                    label: p.name,
+                                })) ?? []}
+                                required
+                                disabled={isPendingUpdate || isPending}
+                                isLoading={isPendingProduct}
+                            />
+                        )}
+
+                        {linkType === LinkType.CATEGORY && (
+                            <FormSelect
+                                label="Select Category"
+                                id="linkValue"
+                                value={linkValue}
+                                onChange={(e) => setLinkValue(e.target.value)}
+                                options={categoryData?.data?.data?.map((p) => ({
+                                    value: p.name.toLowerCase(),
+                                    label: p.name,
+                                })) ?? []}
+                                required
+                                disabled={isPendingUpdate || isPending}
+                                isLoading={isPendingCategory}
+                            />
+                        )}
+
+                        {linkType === LinkType.BRAND && (
+                            <FormSelect
+                                label="Select Brand"
+                                id="linkValue"
+                                value={linkValue}
+                                onChange={(e) => setLinkValue(e.target.value)}
+                                options={brandData?.data?.data?.map((p) => ({
+                                    value: p.name.toLowerCase(),
+                                    label: p.name,
+                                })) ?? []}
+                                required
+                                disabled={isPendingUpdate || isPending}
+                                isLoading={isPendingBrand}
+                            />
+                        )}
+
+                        {linkType === LinkType.SEARCH && (
+                            <FormField
+                                label="Search Keyword"
+                                id="linkValue"
+                                value={linkValue}
+                                onChange={e => setLinkValue(e.target.value)}
+                                placeholder="Enter search keyword"
+                                disabled={isPendingUpdate || isPending}
+                                required
+                            />
+                        )}
+
+                        {linkType === LinkType.CUSTOM && (
+                            <FormField
+                                label="Custom URL"
+                                id="linkValue"
+                                value={linkValue}
+                                onChange={e => setLinkValue(e.target.value)}
+                                placeholder="https://example.com"
+                                disabled={isPendingUpdate || isPending}
+                                required
+                            />
+                        )}
 
                         <FormFileUpload
                             label="Banner Image"
