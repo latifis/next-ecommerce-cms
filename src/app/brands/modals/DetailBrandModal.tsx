@@ -38,7 +38,6 @@ export default function DetailBrandModal({
         <div
             className={`fixed inset-y-0 right-0 bg-white shadow-xl z-50 border-l border-gray-300 transform ${isOpen ? "translate-x-0" : "translate-x-full"
                 } transition-transform duration-300 w-full md:w-1/3`}
-            onMouseLeave={() => onClose(false)}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-gray-100 border-b border-gray-300">

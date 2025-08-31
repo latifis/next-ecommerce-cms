@@ -17,7 +17,7 @@ function AgreementCheckbox({ status, onStatusChange }: AgreementCheckboxProps) {
           className="w-5 h-5 text-blue-500 focus:ring focus:ring-blue-300 rounded"
         />
         <label htmlFor="agreement" className="text-gray-700 text-sm leading-relaxed">
-          I agree to verify this payment and confirm that all details are correct.
+          I have reviewed the payment information and agree to proceed with the selected action.
         </label>
       </div>
     </div>

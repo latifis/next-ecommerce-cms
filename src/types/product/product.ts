@@ -20,4 +20,7 @@ export interface Product {
     minQuantityForDiscount: number;
     bulkDiscountPrice: number;
     code: string;
+    weight?: number;
+    weightUnit?: string;
+    purchasePrice: string;
 }

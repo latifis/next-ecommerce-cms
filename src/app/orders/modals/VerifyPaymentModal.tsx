@@ -1,9 +1,8 @@
 "use client";
 
 import ErrorComponent from "@/components/ui/feedback/Error";
-import { useOrderById, useVerifyPayment } from "@/satelite/services/orderService";
+import { useOrderById, useRejectPayment, useVerifyPayment } from "@/satelite/services/orderService";
 import { useState } from "react";
-import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { PaymentStatus } from "@/enum/paymentStatus";
@@ -16,6 +15,7 @@ import StateIndicator from "@/components/ui/feedback/StateIndicator";
 import PopupImage from "@/components/ui/modal/PopupImage";
 import Button from "@/components/ui/button/Button";
 import ModalBox from "@/components/ui/modal/ModalBox";
+import { FaSpinner } from "react-icons/fa";
 
 type VerifyPaymentModalProps = {
     paymentId: string | undefined;
@@ -38,7 +38,8 @@ export default function VerifyPaymentModal({
         setStatusAgreement(false);
     };
 
-    const { mutate: updatePayment, isPending: isPendingVerify } = useVerifyPayment();
+    const { mutate: verifyPayment, isPending: isPendingVerify } = useVerifyPayment();
+    const { mutate: rejectPayment, isPending: isPendingReject } = useRejectPayment();
     const { data: order, isPending, isError } = useOrderById(paymentId);
 
     const handleVerifyPayment = (e: React.FormEvent) => {
@@ -54,7 +55,7 @@ export default function VerifyPaymentModal({
             paymentStatus: PaymentStatus.CONFIRMED
         };
 
-        updatePayment(updatedOrder, {
+        verifyPayment(updatedOrder, {
             onSuccess: () => {
                 toast.success("Payment verification initiated.");
                 onDone();
@@ -68,6 +69,36 @@ export default function VerifyPaymentModal({
                     }
                 } else {
                     toast.error("Failed to verify Payment: Unknown error");
+                }
+                setStatusAgreement(false);
+            }
+        });
+    };
+
+    const handleReject = async () => {
+        if (!statusAgreement) {
+            toast.error("Please check the agreement box to proceed.");
+            return;
+        }
+        const updatedOrder: Payment = {
+            id: order?.data.payment?.id,
+            paymentStatus: PaymentStatus.CANCELLED
+        };
+
+        rejectPayment(updatedOrder, {
+            onSuccess: () => {
+                toast.success("Payment rejection initiated.");
+                onDone();
+                setStatusAgreement(false);
+                onClose(false);
+            },
+            onError: (error: unknown) => {
+                if (error instanceof AxiosError) {
+                    if (error.response?.data?.message) {
+                        toast.error("Failed to reject Payment: " + error.response.data.message);
+                    }
+                } else {
+                    toast.error("Failed to reject Payment: Unknown error");
                 }
                 setStatusAgreement(false);
             }
@@ -171,11 +202,23 @@ export default function VerifyPaymentModal({
 
             <ModalBox.Footer>
                 <Button
+                    onClick={handleReject}
+                    loading={isPendingReject}
+                    disabled={isPendingReject || isPendingVerify || isPending}
+                    variant="danger"
+                    icon={isPendingReject ? <FaSpinner className="animate-spin" /> : undefined}
+                    className="w-full"
+                >
+                    {isPendingReject ? "Rejecting..." : "Reject"}
+                </Button>
+
+                <Button
                     onClick={handleVerifyPayment}
                     loading={isPendingVerify}
-                    disabled={isPendingVerify || isPending}
+                    disabled={isPendingVerify || isPendingReject || isPending}
                     variant="primary"
                     icon={isPendingVerify ? <FaSpinner className="animate-spin" /> : undefined}
+                    className="w-full"
                 >
                     {isPendingVerify ? "Verifying..." : "Verify"}
                 </Button>

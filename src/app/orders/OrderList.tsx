@@ -111,7 +111,7 @@ export default function OrderList({
                                     ${order.orderStatus === OrderStatus.COMPLETED
                                         ? "text-gray-400 italic"
                                         : order.orderStatus === OrderStatus.CANCELLED
-                                            ? "text-red-400 line-through italic"
+                                            ? "text-red-400 italic"
                                             : "text-gray-800"
                                     }
                                 `}

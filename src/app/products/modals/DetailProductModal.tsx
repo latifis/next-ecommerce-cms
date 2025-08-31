@@ -38,7 +38,6 @@ export default function DetailProductModal({
         <div
             className={`fixed inset-y-0 right-0 bg-white shadow-xl z-50 border-l border-gray-300 transform ${isOpen ? "translate-x-0" : "translate-x-full"
                 } transition-transform duration-300 w-full md:w-2/5`}
-            onMouseLeave={() => onClose(false)}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-gray-100 border-b border-gray-300">
@@ -89,7 +88,7 @@ export default function DetailProductModal({
                         {product && (
                             <div className="space-y-6">
                                 {/* Stock, Category, and Brand */}
-                                <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
+                                <div className="grid grid-cols-4 gap-4 text-sm text-gray-600">
                                     <div className="flex flex-col items-center">
                                         <span className="font-semibold text-gray-800">Stock</span>
                                         <span className="text-center">{product.data.stock + " " + product.data.unit?.toUpperCase()}</span>
@@ -102,10 +101,14 @@ export default function DetailProductModal({
                                         <span className="font-semibold text-gray-800">Brand</span>
                                         <span className="text-center">{product.data.brandName || "N/A"}</span>
                                     </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="font-semibold text-gray-800">Weight</span>
+                                        <span className="text-center">{product.data.weight && product.data.weightUnit ? product.data.weight + " " + product.data.weightUnit?.toUpperCase() : "N/A"}</span>
+                                    </div>
                                 </div>
 
                                 {/* Product Description */}
-                                <p className="text-gray-600 px-3">{product.data.description || "No description available."}</p>
+                                <p className="text-gray-600 px-3 text-center">{product.data.description || "No description available."}</p>
 
                                 {/* Product Price */}
                                 <p className="text-center text-xl font-extrabold text-green-900 px-3">
@@ -129,6 +132,10 @@ export default function DetailProductModal({
                                         <div className="flex justify-between">
                                             <span className="font-medium text-gray-800">Bulk Discount Price:</span>
                                             <span>{product.data.bulkDiscountPrice ? `${product.data.bulkDiscountPrice.toLocaleString()} IDR` : "N/A"}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium text-gray-800">Purchase Price:</span>
+                                            <span>{product.data.purchasePrice ? `${parseFloat(product.data.purchasePrice).toLocaleString()} IDR` : "N/A"}</span>
                                         </div>
                                     </div>
                                 </div>

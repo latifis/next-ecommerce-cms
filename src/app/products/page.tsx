@@ -16,8 +16,8 @@ import { PRODUCT_SORT_FIELDS } from "@/lib/constant";
 
 export default function ProductPage() {
     const [search, setSearch] = useState("");
-    const [sortField, setSortField] = useState<keyof Product>("name");
-    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+    const [sortField, setSortField] = useState<keyof Product>("updatedAt");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const [isModalAddOpen, setIsModalAddOpen] = useState(false);

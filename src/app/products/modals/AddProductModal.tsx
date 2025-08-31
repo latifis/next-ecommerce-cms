@@ -33,11 +33,14 @@ export default function AddProductModal({
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState<number>(2500);
+    const [purchasePrice, setPurchasePrice] = useState<number>(2200);
     const [stock, setStock] = useState<number>(100);
+    const [weight, setWeight] = useState<number>(0);
     const [categoryId, setCategoryId] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [brandId, setBrandId] = useState("");
     const [unit, setUnit] = useState("");
+    const [weightUnit, setWeightUnit] = useState("");
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
     const [minQuantityForDiscount, setMinQuantityForDiscount] = useState<number>(10);
     const [bulkDiscountPrice, setBulkDiscountPrice] = useState<number>(2000);
@@ -46,9 +49,12 @@ export default function AddProductModal({
     const nameInputRef = useRef<HTMLInputElement>(null);
 
     const units = [
-        'Piece', 'Box', 'Kilogram', 'Gram', 'Liter', 'Milliliter', 'Pack', 'Bottle',
-        'Can', 'Bag', 'Sachet', 'Tube', 'Jar', 'Bar', 'Roll', 'Dozen', 'Set', 'Bundle',
-        'Carton', 'Pouch'
+        'Piece', 'Pack', 'Box', 'Dozen', 'Bottle', 'Can',
+        'Bag', 'Sachet', 'Roll', 'Carton', 'Set', 'Bundle'
+    ];
+
+    const weightUnits = [
+        'Kilogram', 'Gram', 'Liter', 'Milliliter', 'Pound', 'Ounce', 'Sheet'
     ];
 
     const filters = { limit: 10000 };
@@ -80,6 +86,7 @@ export default function AddProductModal({
         setName("");
         setDescription("");
         setPrice(2500);
+        setPurchasePrice(2200);
         setStock(100);
         setCategoryId("")
         setImageFile(null);
@@ -100,8 +107,20 @@ export default function AddProductModal({
         } else if (!price) {
             toast.error("Please enter a product price.");
             return;
+        } else if (!purchasePrice) {
+            toast.error("Please enter a product purchase price.");
+            return;
+        } else if (!stock) {
+            toast.error("Please enter a product stock.");
+            return;
         } else if (!unit) {
             toast.error("Please enter a product unit.");
+            return;
+        } else if (!weight) {
+            toast.error("Please enter a product weight.");
+            return;
+        } else if (!weightUnit) {
+            toast.error("Please enter a product weight unit.");
             return;
         } else if (!discountPercentage && discountPercentage !== 0) {
             toast.error("Please enter a discount percentage.");
@@ -111,9 +130,6 @@ export default function AddProductModal({
             return;
         } else if (!bulkDiscountPrice) {
             toast.error("Please enter a bulk discount price.");
-            return;
-        } else if (!stock) {
-            toast.error("Please enter a product stock.");
             return;
         } else if (!categoryId) {
             toast.error("Please enter a product category.");
@@ -133,10 +149,13 @@ export default function AddProductModal({
         newProduct.append("name", name);
         newProduct.append("description", description);
         newProduct.append("price", price.toString());
+        newProduct.append("purchasePrice", purchasePrice.toString());
         newProduct.append("stock", stock.toString());
+        newProduct.append("unit", unit);
+        newProduct.append("weight", weight.toString());
+        newProduct.append("weightUnit", weightUnit);
         newProduct.append("categoryId", categoryId);
         newProduct.append("brandId", brandId);
-        newProduct.append("unit", unit);
         newProduct.append("discountPercentage", discountPercentage.toString());
         newProduct.append("minQuantityForDiscount", minQuantityForDiscount.toString());
         newProduct.append("bulkDiscountPrice", bulkDiscountPrice.toString());
@@ -205,6 +224,17 @@ export default function AddProductModal({
                 />
 
                 <FormField
+                    label="Purchase Price"
+                    id="purchasePrice"
+                    type="number"
+                    value={purchasePrice}
+                    onChange={(e) => setPurchasePrice(Number(e.target.value))}
+                    placeholder="Enter product purchase price"
+                    required
+                    min={0}
+                />
+
+                <FormField
                     label="Price"
                     id="price"
                     type="number"
@@ -213,6 +243,17 @@ export default function AddProductModal({
                     placeholder="Enter product price"
                     required
                     min={0}
+                />
+
+                <FormField
+                    label="Stock"
+                    id="stock"
+                    type="number"
+                    value={stock}
+                    onChange={e => setStock(Number(e.target.value))}
+                    placeholder="Enter product stock"
+                    min={0}
+                    required
                 />
 
                 <FormSelect
@@ -226,6 +267,30 @@ export default function AddProductModal({
                     }))}
                     required
                     placeholder="Select unit"
+                />
+
+                <FormField
+                    label="Weight"
+                    id="weight"
+                    type="number"
+                    value={weight}
+                    onChange={e => setWeight(Number(e.target.value))}
+                    placeholder="Enter product weight"
+                    min={0}
+                    required
+                />
+
+                <FormSelect
+                    label="Weight Unit"
+                    id="weightUnit"
+                    value={weightUnit}
+                    onChange={(e) => setWeightUnit(e.target.value)}
+                    options={weightUnits.map((weightUnitOption) => ({
+                        value: weightUnitOption,
+                        label: weightUnitOption,
+                    }))}
+                    required
+                    placeholder="Select weight unit"
                 />
 
                 <FormField
@@ -257,17 +322,6 @@ export default function AddProductModal({
                     value={bulkDiscountPrice}
                     onChange={e => setBulkDiscountPrice(Number(e.target.value))}
                     placeholder="Enter product bulk discount price"
-                    min={0}
-                    required
-                />
-
-                <FormField
-                    label="Stock"
-                    id="stock"
-                    type="number"
-                    value={stock}
-                    onChange={e => setStock(Number(e.target.value))}
-                    placeholder="Enter product stock"
                     min={0}
                     required
                 />

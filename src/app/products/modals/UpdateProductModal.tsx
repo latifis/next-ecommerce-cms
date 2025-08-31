@@ -32,21 +32,27 @@ export default function UpdateProductModal({
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState<number>(2500);
+    const [purchasePrice, setPurchasePrice] = useState<number>(2200);
     const [stock, setStock] = useState<number>(100);
+    const [weight, setWeight] = useState<number>(0);
     const [categoryId, setCategoryId] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
     const [brandId, setBrandId] = useState("");
     const [unit, setUnit] = useState("");
+    const [weightUnit, setWeightUnit] = useState("");
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
     const [minQuantityForDiscount, setMinQuantityForDiscount] = useState<number>(10);
     const [bulkDiscountPrice, setBulkDiscountPrice] = useState<number>(2000);
     const [code, setCode] = useState("");
 
     const units = [
-        'Piece', 'Box', 'Kilogram', 'Gram', 'Liter', 'Milliliter', 'Pack', 'Bottle',
-        'Can', 'Bag', 'Sachet', 'Tube', 'Jar', 'Bar', 'Roll', 'Dozen', 'Set', 'Bundle',
-        'Carton', 'Pouch'
+        'Piece', 'Pack', 'Box', 'Dozen', 'Bottle', 'Can',
+        'Bag', 'Sachet', 'Roll', 'Carton', 'Set', 'Bundle'
+    ];
+
+    const weightUnits = [
+        'Kilogram', 'Gram', 'Liter', 'Milliliter', 'Pound', 'Ounce', 'Sheet'
     ];
 
     const filters = { limit: 10000 };
@@ -67,6 +73,7 @@ export default function UpdateProductModal({
         setName("");
         setDescription("");
         setPrice(2500);
+        setPurchasePrice(2200);
         setStock(100);
         setCategoryId("");
         setImageFile(null);
@@ -84,6 +91,7 @@ export default function UpdateProductModal({
             setName(product.data.name || "");
             setDescription(product.data.description || "");
             setPrice(product.data.price || 0);
+            setPurchasePrice(product.data.purchasePrice ? parseFloat(product.data.purchasePrice) : 0);
             setStock(product.data.stock || 0);
             setCategoryId(product.data.categoryId || "");
             setBrandId(product.data.brandId || "");
@@ -123,6 +131,7 @@ export default function UpdateProductModal({
         updatedProduct.append("name", name);
         updatedProduct.append("description", description);
         updatedProduct.append("price", price.toString());
+        updatedProduct.append("purchasePrice", purchasePrice.toString());
         updatedProduct.append("stock", stock.toString());
         updatedProduct.append("categoryId", categoryId);
         updatedProduct.append("brandId", brandId);
@@ -207,6 +216,18 @@ export default function UpdateProductModal({
                         />
 
                         <FormField
+                            label="Purchase Price"
+                            id="purchasePrice"
+                            type="number"
+                            value={purchasePrice}
+                            onChange={(e) => setPurchasePrice(Number(e.target.value))}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter product purchase price"
+                            required
+                            min={0}
+                        />
+
+                        <FormField
                             label="Price"
                             id="price"
                             type="number"
@@ -216,6 +237,18 @@ export default function UpdateProductModal({
                             placeholder="Enter product price"
                             required
                             min={0}
+                        />
+
+                        <FormField
+                            label="Stock"
+                            id="stock"
+                            type="number"
+                            value={stock}
+                            onChange={e => setStock(Number(e.target.value))}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter product stock"
+                            min={0}
+                            required
                         />
 
                         <FormSelect
@@ -230,6 +263,32 @@ export default function UpdateProductModal({
                             }))}
                             required
                             placeholder="Select unit"
+                        />
+
+                        <FormField
+                            label="Weight"
+                            id="weight"
+                            type="number"
+                            value={weight}
+                            onChange={e => setWeight(Number(e.target.value))}
+                            disabled={isPendingUpdate}
+                            placeholder="Enter product weight"
+                            min={0}
+                            required
+                        />
+
+                        <FormSelect
+                            label="Weight Unit"
+                            id="weightUnit"
+                            value={weightUnit}
+                            onChange={(e) => setWeightUnit(e.target.value)}
+                            disabled={isPendingUpdate}
+                            options={weightUnits.map((weightUnitOption) => ({
+                                value: weightUnitOption,
+                                label: weightUnitOption,
+                            }))}
+                            required
+                            placeholder="Select weight unit"
                         />
 
                         <FormField
@@ -264,18 +323,6 @@ export default function UpdateProductModal({
                             onChange={e => setBulkDiscountPrice(Number(e.target.value))}
                             disabled={isPendingUpdate}
                             placeholder="Enter product bulk discount price"
-                            min={0}
-                            required
-                        />
-
-                        <FormField
-                            label="Stock"
-                            id="stock"
-                            type="number"
-                            value={stock}
-                            onChange={e => setStock(Number(e.target.value))}
-                            disabled={isPendingUpdate}
-                            placeholder="Enter product stock"
                             min={0}
                             required
                         />

@@ -12,6 +12,7 @@ import { fetchItemsOrderById } from "../hook/order/useItemsOrderById";
 import { preShippingCheckOrder } from "../hook/order/usePreShippingCheckOrder";
 import { CreateOrderInput } from "@/types/order/createOrderInput";
 import { addOrder } from "../hook/order/useAddOrder";
+import { rejectPayment } from "../hook/order/useRejectPayment";
 
 export const useAddOrder = () => {
   return useMutation({
@@ -54,6 +55,12 @@ export const useMarkAsDoneOrder = () => {
 export const useVerifyPayment = () => {
   return useMutation({
     mutationFn: (payment: Payment) => verifyPayment(payment)
+  });
+};
+
+export const useRejectPayment = () => {
+  return useMutation({
+    mutationFn: (payment: Payment) => rejectPayment(payment)
   });
 };
 
