@@ -1,9 +1,9 @@
 "use client";
 
-const BannerListSkeleton = () => {
+const PaymentListSkeleton = () => {
     return (
         <>
-            {Array.from({ length: 5 }).map((_, index) => (
+            {Array.from({ length: 3 }).map((_, index) => (
                 <tr key={index} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-t`}>
                     <td className="px-6 py-4">
                         <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
@@ -21,21 +21,23 @@ const BannerListSkeleton = () => {
                         <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
                     </td>
                     <td className="px-6 py-4">
-                        <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                        <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
                     </td>
                     <td className="px-6 py-4">
-                        <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                        <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                        <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end space-x-2">
-                            <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="flex justify-end">
                             <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
                         </div>
                     </td>
                 </tr>
             ))}
         </>
-    )
-}
+    );
+};
 
-export default BannerListSkeleton;
+export default PaymentListSkeleton;

@@ -5,9 +5,11 @@ import { SORT_ORDER_ASC, SORT_ORDER_DESC } from "@/lib/constant";
 import { Banner } from "@/types/banner/banner";
 import { formatDate } from "@/utils/formatDate";
 import { formatTime } from "@/utils/formatTime";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaEye } from "react-icons/fa";
 import DataTable, { DataTableColumn } from "@/components/ui/table/DataTable";
 import { filterSortPaginate } from "@/utils/dataUtils";
+import { useState } from "react";
+import ShowBannerImageModal from "./modals/ShowBannerImageModal";
 
 type BannerListProps = {
     onUpdate: (bannerId: string | undefined) => void;
@@ -26,10 +28,9 @@ const columns: DataTableColumn[] = [
     { label: "Description", key: "description", subtitle: "Description of the Banner" },
     { label: "Sequence", key: "sequence", subtitle: "Sequence of the Banner" },
     { label: "Media Type", key: "mediaType", subtitle: "MediaType of the Banner" },
-    { label: "Banner Url", key: "url", subtitle: "Url of the Banner" },
     { label: "Date Created", key: "createdAt", subtitle: "Date created of the Banner" },
     { label: "Latest Update", key: "updatedAt", subtitle: "Date of Latest Update" },
-    { label: "Actions", key: "actions", subtitle: "Manage Product", align: "right" },
+    { label: "Actions", key: "actions", subtitle: "Manage Banner", align: "right" },
 ];
 
 export default function BannerList({
@@ -54,6 +55,19 @@ export default function BannerList({
         pageSize
     );
 
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [selectedBannerUrl, setSelectedBannerUrl] = useState("");
+
+    const handleOpenModal = (bannerId: string | undefined) => {
+        const banner = banners.find(b => b.id === bannerId);
+        if (banner && banner.url) {
+            setSelectedBannerUrl(banner.url);
+        } else {
+            setSelectedBannerUrl("");
+        }
+        setIsOpenModal(true);
+    };
+
     function renderRow(banner: Banner, index: number) {
         return (
             <tr key={banner.id} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-t`}>
@@ -62,7 +76,6 @@ export default function BannerList({
                 <td className="px-6 py-4 text-sm text-gray-800">{banner.description || "N/A"}</td>
                 <td className="px-6 py-4 text-sm text-gray-800">{banner.sequence || "N/A"}</td>
                 <td className="px-6 py-4 text-sm text-gray-800">{banner.mediaType || "N/A"}</td>
-                <td className="px-6 py-4 text-sm text-gray-800">{banner.url || "N/A"}</td>
                 <td className="px-6 py-4 text-sm text-gray-700">
                     <div className="flex flex-col text-left">
                         <span>{formatDate(banner.createdAt)}</span>
@@ -76,6 +89,14 @@ export default function BannerList({
                     </div>
                 </td>
                 <td className="px-6 py-4 text-right">
+                    {banner.url && (
+                        <button
+                            onClick={() => handleOpenModal(banner.id)}
+                            className="bg-orange-100 text-orange-600 hover:bg-orange-200 hover:text-orange-700 px-3 py-2 rounded mx-2 mb-2"
+                        >
+                            <FaEye />
+                        </button>
+                    )}
                     <button
                         onClick={() => onUpdate(banner.id)}
                         className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700 px-3 py-2 rounded mx-2"
@@ -88,13 +109,21 @@ export default function BannerList({
     }
 
     return (
-        <DataTable<Banner>
-            columns={columns}
-            data={paginatedBanners}
-            loading={onLoading}
-            skeleton={<BannerListSkeleton />}
-            emptyText="No banners found."
-            renderRow={renderRow}
-        />
+        <>
+            <DataTable<Banner>
+                columns={columns}
+                data={paginatedBanners}
+                loading={onLoading}
+                skeleton={<BannerListSkeleton />}
+                emptyText="No banners found."
+                renderRow={renderRow}
+            />
+
+            <ShowBannerImageModal
+                isOpen={isOpenModal}
+                onClose={setIsOpenModal}
+                url={selectedBannerUrl}
+            />
+        </>
     );
 }

@@ -14,6 +14,7 @@ export interface User {
     profileImageUrl: string;
     languagePreference: Language;
     isActive: boolean;
+    isVerified: boolean;
     createdAt: string;
     updatedAt: string;
 }

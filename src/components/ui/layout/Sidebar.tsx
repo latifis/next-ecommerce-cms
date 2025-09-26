@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FaTag, FaSignOutAlt, FaBars, FaUserCircle, FaStore, FaShoppingCart, FaBox, FaFolderOpen, FaClipboardList } from "react-icons/fa";
+import { FaTag, FaSignOutAlt, FaBars, FaUserCircle, FaStore, FaShoppingCart, FaBox, FaFolderOpen, FaClipboardList, FaMoneyCheckAlt } from "react-icons/fa";
 import { capitalizeWords } from "@/utils/stringUtils";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/client/axios-client";
@@ -32,6 +32,7 @@ export default function Sidebar({ setIsOpen }: SidebarProps) {
       items: [
         { name: "Home", icon: <IoHomeSharp />, path: "/" },
         { name: "Banner", icon: <FaFolderOpen />, path: "/banner" },
+        { name: "Payments", icon: <FaMoneyCheckAlt />, path: "/payments" },
       ],
     },
     {

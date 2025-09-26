@@ -9,6 +9,7 @@ import { formatDate } from "@/utils/formatDate";
 import { formatTime } from "@/utils/formatTime";
 import { FaEdit, FaInfoCircle } from "react-icons/fa";
 import DataTable, { DataTableColumn } from "@/components/ui/table/DataTable";
+import { MdVerified } from "react-icons/md";
 
 type UserListProps = {
     onUpdate: (userId: string) => void;
@@ -78,7 +79,7 @@ export default function UserList({
                     {user.name || "N/A"}
                 </td>
                 <td className={`px-6 py-4 text-sm ${baseText}`}>
-                    {user.email || "N/A"}
+                    {user.email || "N/A"}{user.isVerified ? <MdVerified className="inline text-green-500 ml-1" /> : null}
                 </td>
                 <td className={`px-6 py-4 text-sm ${baseText}`}>
                     {user.phone || "N/A"}

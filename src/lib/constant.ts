@@ -2,6 +2,7 @@ import { Banner } from "@/types/banner/banner";
 import { Brand } from "@/types/brand/brand";
 import { Category } from "@/types/category/category";
 import { Order } from "@/types/order/order";
+import { Payment } from "@/types/payment/payment";
 import { Product } from "@/types/product/product";
 import { User } from "@/types/user/user";
 
@@ -19,6 +20,10 @@ export const PRODUCT_SORT_FIELDS: (keyof Product)[] = [
 
 export const BANNER_SORT_FIELDS: (keyof Banner)[] = [
     "name", "updatedAt"
+];
+
+export const PAYMENT_SORT_FIELDS: (keyof Payment)[] = [
+    "bankName", "bankAccountNumber", "accountHolder", "updatedAt"
 ];
 
 export const ORDER_SORT_FIELDS: (keyof Order)[] = [
